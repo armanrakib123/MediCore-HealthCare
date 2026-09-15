@@ -1,0 +1,123 @@
+🏥 MediCore | Smart Prescription Tracker
+SLT Internship Sample Project - User Manual
+===========================================
+
+📌 Project Summary
+------------------
+MediCore is a multi-role healthcare platform built by the Smart Prescription Tracker team.
+Main roles: Patient, Doctor, Pharmacist, Admin.
+
+
+📁 Folder Structure (Important)
+-------------------------------
+smart-rx-frontend/
+├── src/                          -> React frontend source code
+│   ├── pages/                    -> Dashboards & main screens
+│   ├── components/               -> Reusable UI components
+│   ├── api/                      -> Axios API client and endpoints
+│   └── hooks/, utils/            -> Shared logic/helpers
+├── public/                       -> Static assets
+├── HealthCarePlus.API/           -> ASP.NET Core backend API
+│   ├── Controllers/              -> API endpoints
+│   ├── Services/                 -> Business logic
+│   ├── Repositories/             -> Data layer
+│   ├── Models/                   -> MongoDB models
+│   └── DTOs/                     -> Request/response contracts
+├── package.json                  -> Frontend scripts/dependencies
+├── smart-rx-frontend.sln         -> .NET solution
+└── README.md
+
+
+✅ Prerequisites
+----------------
+1) Node.js 20.19+ (or 22.12+)
+2) npm
+3) .NET SDK 10
+4) MongoDB running locally or remote
+
+
+🚀 How to Run the Project
+-------------------------
+1) Run Backend API
+   - Open terminal:
+     cd /Users/ravindupiyumal/Desktop/newhealthcare/smart-rx-frontend/HealthCarePlus.API
+     dotnet restore
+     dotnet run
+
+   - Backend URL:
+     http://localhost:5000
+
+2) Run Frontend
+   - Open another terminal:
+     cd /Users/ravindupiyumal/Desktop/newhealthcare/smart-rx-frontend
+     npm install
+     npm run dev
+
+   - Frontend URL:
+     http://localhost:5173
+
+3) API Base URL (if needed)
+   - In frontend .env file set:
+     VITE_API_BASE=http://localhost:5000
+
+
+🔐 Login Methods
+----------------
+A) Normal Login
+   - Go to: http://localhost:5173/auth
+   - Select your role and login with email/username + password.
+
+B) Google Login
+   - On Login page, click Google sign-in.
+   - Complete Google account popup/consent.
+   - System calls /api/auth/login-google and logs user in.
+
+   Notes:
+   - Internet connection is required.
+   - Browser popup blocking should be disabled for localhost.
+
+
+💊 Registered Pharmacy Sample (Requested)
+----------------------------------------
+Sample pharmacy account:
+- Email    : heyliss@gmail.com
+- Password : 12345678
+
+Sample pharmacy profile/address:
+- Pharmacy Name : Heyliss Pharmacy
+- Address       : No. 25, Galle Road, Bambalapitiya
+- City          : Colombo
+- State         : Western
+- Zip Code      : 00400
+
+⚠️ If this account is not available in your current DB,
+   register a pharmacist from /auth using the same details.
+
+
+🧪 Quick Test Flow
+------------------
+1) Login as Pharmacist (sample above)
+2) Open Pharmacy Dashboard
+3) Check prescription queue / ready for pickup status
+4) Login as Patient in another browser profile
+5) Upload prescription and verify status updates
+
+
+🛠️ Troubleshooting
+-------------------
+- "vite: command not found"
+  -> Run npm install in smart-rx-frontend folder.
+
+- Backend not starting
+  -> Ensure MongoDB is running and port 5000 is free.
+
+- Google login not opening
+  -> Allow popups and check internet/network restrictions.
+
+
+👥 Team
+-------
+Smart Prescription Tracker Team
+SLT Internship Period Sample Project
+
+✨ End of User Manual ✨

@@ -1,0 +1,264 @@
+/* Plain CSS for Login page — works alongside existing Tailwind classes.
+   This file provides a conventional stylesheet for the login/register card.
+   Add or adjust values as needed. */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 50%, #ecfdf5 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page img.bg-image {
+  position: absolute;
+  left: -5rem;
+  top: -2.5rem;
+  width: 140%;
+  opacity: 0.45;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.auth-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.12);
+  padding: 2rem;
+  max-width: 480px;
+  width: 100%;
+}
+
+.toggle-buttons {
+  display: flex;
+  margin-bottom: 1.5rem;
+  background: #f1f2f3;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.toggle-buttons button {
+  flex: 1 1 0;
+  border: none;
+  padding: 0.6rem 1rem;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #050505;
+  transition: all 0.15s ease-in-out;
+}
+
+.toggle-buttons button.active {
+  background: #059669; /* emerald green */
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+  font-weight: 600;
+}
+
+/* Form inputs: leave space for icon on the left */
+.form-input {
+  width: 100%;
+  padding: 0.6rem 1rem 0.6rem 2.6rem; /* left padding for icon */
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 10px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+  outline: none;
+  font-size: 0.95rem;
+  background: #fff;
+  color: #1f2937; /* dark gray text color */
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.12); /* emerald-400 ring */
+  border-color: transparent;
+}
+
+.date-input {
+  /* Ensure date input styling is consistent */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn-primary {
+  display: inline-block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-image: linear-gradient(90deg, #059669 0%, #10b981 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(16,185,129,0.12);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.01);
+}
+
+.small-text {
+  font-size: 0.9rem;
+  color: #4b5563; /* gray-600 */
+}
+
+.footer-note {
+  text-align: center;
+  margin-top: 1.25rem;
+  color: #6b7280; /* gray-500 */
+  font-size: 0.875rem;
+}
+
+/* Decorative blobs & animations (simple fallback if Tailwind utilities not used) */
+.pulse-ring, .heartbeat, .animate-pan, .animate-blob {
+  /* basic fallback animation properties so ruleset is non-empty */
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 1.5rem;
+    max-width: 400px;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .login-page {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-card { padding: 1.25rem; border-radius: 14px; }
+  .title {
+    font-size: 1.25rem;
+  }
+  .logo {
+    width: 4rem;
+    height: 4rem;
+  }
+  .logo .icon {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+/* Animations and header/logo styles moved from inline JSX */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  10%, 30% { transform: scale(1.1); }
+  20%, 40% { transform: scale(0.95); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pan {
+  0% { transform: translateX(0) scale(1.05); }
+  50% { transform: translateX(-8%) scale(1.05); }
+  100% { transform: translateX(0) scale(1.05); }
+}
+
+@keyframes blob {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-18px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.fade-in { animation: fadeIn 0.5s ease-out; }
+.heartbeat { animation: heartbeat 1.5s ease-in-out infinite; }
+.pulse-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+.animate-pan { animation: pan 24s linear infinite; will-change: transform; }
+.animate-blob { animation: blob 8s ease-in-out infinite; }
+.delay-2s { animation-delay: 2s; }
+
+.header { text-align: center; margin-bottom: 2rem; }
+.logo-wrapper { position: relative; display: inline-block; margin-bottom: 0.5rem; }
+.logo { display:flex; align-items:center; justify-content:center; width:5rem; height:5rem; border-radius:50%; background: linear-gradient(135deg,#ef4444,#ec4899); color:#fff; box-shadow:0 8px 20px rgba(2,6,23,0.12); }
+.logo .icon { width:2.5rem; height:2.5rem; }
+.logo-pulse-1, .logo-pulse-2 { position:absolute; inset:0; display:block; border-radius:50%; }
+.logo-pulse-1 { background:#f87171; opacity:0.35; }
+.logo-pulse-2 { background:#fca5a5; opacity:0.25; }
+
+.bg-decor { position:absolute; inset:0; z-index:-20; overflow:hidden; }
+.bg-decor .bg-image { position:absolute; left:-5rem; top:-2.5rem; width:140%; opacity:0.4; transform-origin:center; }
+.bg-decor .blob-1, .bg-decor .blob-2 { position:absolute; border-radius:50%; opacity:0.3; }
+.bg-decor .blob-1 { top:2rem; right:-10%; width:18rem; height:18rem; background:#bbf7d0; }
+.bg-decor .blob-2 { bottom:0; left:-10%; width:24rem; height:24rem; background:#bbf7d0; }
+
+.container {
+  width: 100%;
+  max-width: 28rem; /* ~448px */
+  margin: 0 auto;
+}
+
+.input-group { position: relative; }
+.icon-left { position: absolute; left:0.75rem; top:50%; transform: translateY(-50%); width:1.25rem; height:1.25rem; color:#9CA3AF; }
+.label { display:block; font-size:0.9rem; font-weight:500; color:#374151; margin-bottom:0.5rem; }
+.text-muted { color:#6b7280; }
+
+.toggle-btn { 
+  padding: 0.6rem 1rem; 
+  border-radius: 6px; 
+  border: none; 
+  background: transparent; 
+  cursor: pointer; 
+  font-weight: 500; 
+  color: #4b5563;
+  transition: all 0.2s ease-in-out; 
+}
+
+.toggle-btn:hover {
+  color: #059669;
+  background: rgba(5, 150, 105, 0.08);
+}
+
+.toggle-btn.active { 
+  background: #059669; 
+  color: #ffffff; 
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2); 
+}
+
+.toggle-btn.active:hover {
+  background: #047857;
+  color: #ffffff;
+}
+
+.form-actions { margin-top:0.5rem; }
+.checkbox { width:1rem; height:1rem; }
+.link-btn { background:transparent; border:none; color:#059669; cursor:pointer; }
+
+.btn-primary { /* ensure btn-primary exists (defined earlier), provide a minimal override here */
+  border: none;
+  display: inline-block;
+}
+
+.small-text { font-size:0.9rem; color:#4b5563; }
+.footer-note { text-align:center; margin-top:1.25rem; color:#6b7280; font-size:0.875rem; }
+
+.title { font-size:1.875rem; font-weight:700; color:#1f2937; margin-bottom:0.5rem; }
+.subtitle { color:#6b7280; }
+.form-row { display:flex; align-items:center; justify-content:space-between; gap:0.5rem; }
+.checkbox-label, .checkbox-row { display:flex; align-items:center; gap:0.5rem; }
+.form-block { display:flex; flex-direction:column; gap:1rem; }

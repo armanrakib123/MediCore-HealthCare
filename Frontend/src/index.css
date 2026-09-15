@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure predictable sizing and responsive behavior */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  /* Let the app take full available height; use min-height so mobile address bars behave better */
+  min-height: 100vh;
+  /* avoid horizontal scrolling caused by slight overflows */
+  overflow-x: hidden;
+}
+
+body {
+  /* do not center the whole app vertically; let layout control flow */
+  background-color: inherit;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 2.6vw + 1rem, 3.2rem);
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* Utilities and layout helpers */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Full-height sections useful for pages that should fill the viewport */
+.full-height {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive typography helpers */
+.lead {
+  font-size: clamp(0.95rem, 0.8vw + 0.6rem, 1.05rem);
+  color: rgba(255,255,255,0.9);
+}
+
+/* Card utility */
+.card {
+  background: rgba(255,255,255,0.03);
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(10,10,10,0.12);
+}
+
+@media (max-width: 768px) {
+  .site-main, .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  h1 { font-size: 1.6rem }
+}

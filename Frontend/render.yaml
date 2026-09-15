@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: healthcareplus-api
+    runtime: docker
+    rootDir: HealthCarePlus.API
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: MongoDbSettings__ConnectionString
+        sync: false
+      - key: MongoDbSettings__DatabaseName
+        value: healthcareplus
+      - key: Jwt__Key
+        generateValue: true
+      - key: Jwt__Issuer
+        value: HealthCarePlus
