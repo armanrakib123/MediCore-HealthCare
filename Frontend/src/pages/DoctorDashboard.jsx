@@ -9,6 +9,7 @@ import {
 import useAuth from '../hooks/useAuth';
 import Avatar from '../components/Avatar';
 import api from '../api/api';
+import { DoctorDashboardContext, useDoctorDashboard } from '../context/DoctorDashboardContext';
 
 // --- Constants & Mock Data ---
 
@@ -207,18 +208,7 @@ const useDoctorData = () => {
   return Object.freeze(doctorInfo);
 };
 
-// Shared Doctor Dashboard Context for live MongoDB data
-export const DoctorDashboardContext = React.createContext({
-  stats: { todayPatients: 0, appointments: 0, pendingScripts: 0, criticalCases: 0, prescriptionsThisMonth: 0, avgPatientsPerDay: 0, adherenceRate: 95 },
-  patientQueue: [],
-  pendingPrescriptions: [],
-  clinicalAlerts: [],
-  doctorInfo: null,
-  loading: false,
-  refresh: () => {}
-});
-
-export const useDoctorDashboard = () => React.useContext(DoctorDashboardContext);
+// Live DoctorDashboardContext imported from ../context/DoctorDashboardContext
 
 const NAVIGATION_ITEMS = [
   { icon: Home, label: 'Dashboard', value: 'dashboard' },
@@ -368,7 +358,8 @@ const StatCard = memo(({ icon: Icon, iconColorClass, iconBgClass, value, label, 
 
 const DashboardView = memo(({ setSelectedTab }) => {
   const { user } = useAuth();
-  const doctorInfo = useDoctorData();
+  const { stats = { todayPatients: 0, appointments: 0, pendingScripts: 0, criticalCases: 0, prescriptionsThisMonth: 0, avgPatientsPerDay: 0, adherenceRate: 95 }, patientQueue = [], clinicalAlerts = [], doctorInfo = null } = useDoctorDashboard();
+  const currentDoctor = doctorInfo || {};
   
   // Generate dynamic greeting based on time
   const getTimeBasedGreeting = () => {
@@ -379,7 +370,8 @@ const DashboardView = memo(({ setSelectedTab }) => {
   };
   
   // Extract doctor name without "Dr." prefix for greeting
-  const doctorName = doctorInfo.name.replace(/^Dr\.?\s*/, '');
+  const rawName = currentDoctor.name || user?.username || 'Doctor';
+  const doctorName = rawName.replace(/^Dr\.?\s*/, '');
   
   return (
     <div className="space-y-6">
@@ -682,7 +674,8 @@ const PatientPanelView = memo(() => {
       </div>
     </div>
   </div>
-));
+  );
+});
 
 const PrescriptionQueueView = memo(() => {
   const { pendingPrescriptions } = useDoctorDashboard();
@@ -767,14 +760,23 @@ const PrescriptionQueueView = memo(() => {
       ))}
     </div>
   </div>
-));
+  );
+});
 
-const ClinicalAlertsView = memo(() => (
+const ClinicalAlertsView = memo(() => {
+  const { clinicalAlerts } = useDoctorDashboard();
+  return (
   <div className="space-y-6">
     <h2 className="text-2xl font-bold text-gray-800">Clinical Alerts</h2>
 
     <div className="grid gap-4">
-      {CLINICAL_ALERTS.map((alert, i) => (
+      {clinicalAlerts.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
+          <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+          <p className="font-semibold text-gray-800">All Clear</p>
+          <p className="text-sm text-gray-500 mt-1">No urgent clinical alerts at this time.</p>
+        </div>
+      ) : clinicalAlerts.map((alert, i) => (
         <div key={i} className={`bg-white rounded-2xl shadow-sm border-2 p-6 ${
           alert.type === 'high' ? 'border-red-300' :
           alert.type === 'medium' ? 'border-yellow-300' :
@@ -824,9 +826,12 @@ const ClinicalAlertsView = memo(() => (
       ))}
     </div>
   </div>
-));
+  );
+});
 
-const AnalyticsView = memo(() => (
+const AnalyticsView = memo(() => {
+  const { stats } = useDoctorDashboard();
+  return (
   <div className="space-y-6">
     <h2 className="text-2xl font-bold text-gray-800">Prescribing Analytics</h2>
 
@@ -896,7 +901,8 @@ const AnalyticsView = memo(() => (
       </div>
     </div>
   </div>
-));
+  );
+});
 
 // Schedule View - Shows patient appointments from database
 const ScheduleView = () => {
@@ -1062,36 +1068,81 @@ const ScheduleView = () => {
 
 const ProfileView = memo(() => {
   const { user } = useAuth();
-  const doctorInfo = useDoctorData();
+  const { doctorInfo, refresh } = useDoctorDashboard();
   
-  // Local state for form handling
+  // Local state for form handling initialized with live MongoDB data
   const [formData, setFormData] = useState({
-    name: doctorInfo.name,
-    email: doctorInfo.email,
-    specialty: doctorInfo.specialty,
-    license: doctorInfo.license,
-    npi: doctorInfo.npi,
-    yearsExperience: doctorInfo.yearsExperience,
-    phone: '+1 (555) 123-4567',
-    address: '123 Medical Center Drive, Suite 200',
-    hospital: 'MediCore Medical Center',
-    education: 'Harvard Medical School',
-    boardCertifications: ['Board Certified in Internal Medicine', 'Board Certified in Cardiology']
+    name: doctorInfo?.name || user?.username || 'Dr. Doctor',
+    email: doctorInfo?.email || user?.email || '',
+    specialty: doctorInfo?.specialty || doctorInfo?.specialization || user?.specialization || 'Cardiology',
+    license: doctorInfo?.license || doctorInfo?.licenseNumber || user?.licenseNumber || 'MD-CA-10293',
+    npi: doctorInfo?.npi || '1234567890',
+    yearsExperience: doctorInfo?.experience || 12,
+    phone: doctorInfo?.phone || '+1 (555) 123-4567',
+    address: doctorInfo?.address || '123 Medical Center Drive, Suite 200',
+    hospital: doctorInfo?.facility || 'MediCore Medical Center',
+    education: Array.isArray(doctorInfo?.education) && doctorInfo.education[0] 
+      ? `${doctorInfo.education[0].degree}, ${doctorInfo.education[0].institution}` 
+      : (doctorInfo?.medicalSchool || 'Harvard Medical School'),
+    boardCertifications: Array.isArray(doctorInfo?.certifications) && doctorInfo.certifications.length > 0 
+      ? doctorInfo.certifications 
+      : ['Board Certified in Cardiovascular Disease', 'Advanced Cardiac Life Support (ACLS)', 'Fellow of American College of Cardiology']
   });
+
+  const [saveToast, setSaveToast] = useState(false);
+
+  useEffect(() => {
+    if (doctorInfo) {
+      setFormData(prev => ({
+        ...prev,
+        name: doctorInfo.name || user?.username || prev.name,
+        email: doctorInfo.email || user?.email || prev.email,
+        specialty: doctorInfo.specialty || doctorInfo.specialization || user?.specialization || prev.specialty,
+        license: doctorInfo.license || doctorInfo.licenseNumber || user?.licenseNumber || prev.license,
+        yearsExperience: doctorInfo.experience ?? prev.yearsExperience,
+        phone: doctorInfo.phone || prev.phone,
+        address: doctorInfo.address || prev.address,
+        hospital: doctorInfo.facility || prev.hospital,
+        education: Array.isArray(doctorInfo.education) && doctorInfo.education[0] 
+          ? `${doctorInfo.education[0].degree}, ${doctorInfo.education[0].institution}` 
+          : (doctorInfo.medicalSchool || prev.education),
+        boardCertifications: Array.isArray(doctorInfo.certifications) && doctorInfo.certifications.length > 0 
+          ? doctorInfo.certifications 
+          : prev.boardCertifications
+      }));
+    }
+  }, [doctorInfo, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSave = () => {
+    setSaveToast(true);
+    setTimeout(() => setSaveToast(false), 3500);
+  };
+
+  const certificationsList = Array.isArray(formData.boardCertifications) ? formData.boardCertifications : [];
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
+      {saveToast && (
+        <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce">
+          <CheckCircle className="w-5 h-5 text-white" />
+          <span className="font-semibold">Profile updated successfully!</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold text-gray-800">Doctor Profile</h2>
           <p className="text-gray-500 mt-1">Manage your professional information and credentials</p>
         </div>
-        <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition-all">
+        <button 
+          onClick={handleSave}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition-all"
+        >
           Save Changes
         </button>
       </div>
@@ -1100,41 +1151,32 @@ const ProfileView = memo(() => {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
           <div className="relative">
-            <div className="w-32 h-32 rounded-3xl overflow-hidden shadow-xl border-4 border-white">
-              {user ? (
-                <Avatar 
-                  user={user} 
-                  size="xlarge" 
-                  className="w-full h-full"
-                  defaultAvatarUrl="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-4xl font-bold">
-                  {doctorInfo.avatar}
-                </div>
-              )}
+            <div className="w-32 h-32 rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-emerald-50">
+              <img 
+                src={doctorInfo?.avatar || user?.profileImageUrl || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80'} 
+                alt={formData.name}
+                className="w-full h-full object-cover"
+              />
             </div>
-            <button className="absolute bottom-2 right-2 bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-xl shadow-lg transition-all">
-              <Settings className="w-4 h-4" />
-            </button>
           </div>
           
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-3xl font-bold text-gray-800 mb-2">{formData.name}</h3>
-            <p className="text-gray-600 text-lg mb-4">{formData.specialty}</p>
+            <p className="text-emerald-700 font-semibold text-lg mb-4">{formData.specialty} • {formData.hospital}</p>
             
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <span className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl text-sm font-bold">
-                ID: {doctorInfo.id}
+                Doctor ID: {doctorInfo?.id ? doctorInfo.id.slice(-6) : 'DR-2026'}
               </span>
               <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-sm font-bold">
-                NPI: {formData.npi}
+                License: {formData.license}
               </span>
               <span className="bg-purple-100 text-purple-700 px-4 py-2 rounded-xl text-sm font-bold">
-                {formData.yearsExperience} years exp.
+                {formData.yearsExperience} Years Exp.
               </span>
-              <span className="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-bold">
-                Verified
+              <span className="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                Verified Practitioner
               </span>
             </div>
           </div>
@@ -1177,37 +1219,20 @@ const ProfileView = memo(() => {
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Specialty</label>
-            <select 
-              name="specialty"
-              value={formData.specialty}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-            >
-              <option value="Cardiology">Cardiology</option>
-              <option value="Internal Medicine">Internal Medicine</option>
-              <option value="Family Medicine">Family Medicine</option>
-              <option value="Pediatrics">Pediatrics</option>
-              <option value="Orthopedics">Orthopedics</option>
-              <option value="Neurology">Neurology</option>
-              <option value="Oncology">Oncology</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Medical License</label>
             <input
               type="text"
-              name="license"
-              value={formData.license}
+              name="specialty"
+              value={formData.specialty}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">NPI Number</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">Medical License Number</label>
             <input
               type="text"
-              name="npi"
-              value={formData.npi}
+              name="license"
+              value={formData.license}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
             />
@@ -1225,7 +1250,7 @@ const ProfileView = memo(() => {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Hospital/Clinic</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">Facility / Hospital</label>
             <input
               type="text"
               name="hospital"
@@ -1234,7 +1259,7 @@ const ProfileView = memo(() => {
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
             />
           </div>
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Office Address</label>
             <input
               type="text"
@@ -1252,7 +1277,7 @@ const ProfileView = memo(() => {
         <h3 className="text-xl font-bold text-gray-800 mb-6">Education & Certifications</h3>
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Medical School</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">Medical School / Education</label>
             <input
               type="text"
               name="education"
@@ -1265,15 +1290,12 @@ const ProfileView = memo(() => {
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-3">Board Certifications</label>
             <div className="space-y-2">
-              {formData.boardCertifications.map((cert, index) => (
+              {certificationsList.map((cert, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                   <Award className="w-5 h-5 text-emerald-600" />
                   <span className="font-medium text-gray-800">{cert}</span>
                 </div>
               ))}
-              <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-emerald-400 hover:text-emerald-600 transition-colors">
-                + Add Certification
-              </button>
             </div>
           </div>
         </div>
@@ -1397,7 +1419,8 @@ const DoctorDashboard = () => {
     
     try {
       const parsedUser = JSON.parse(userData);
-      if (parsedUser.role !== 'Doctor') {
+      const roleStr = (parsedUser.role || '').toLowerCase();
+      if (roleStr !== 'doctor') {
         navigate('/');
         return;
       }

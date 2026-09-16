@@ -136,7 +136,10 @@ export default function DoctorProfile() {
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const today = new Date().getDay();
     const todayName = days[today];
-    return doctor?.availability[todayName] || [];
+    const defaultSlots = ['09:00 AM', '10:30 AM', '02:00 PM', '03:30 PM', '04:30 PM'];
+    if (!doctor?.availability) return defaultSlots;
+    if (Array.isArray(doctor.availability)) return doctor.availability.length > 0 ? doctor.availability : defaultSlots;
+    return doctor.availability[todayName] || defaultSlots;
   };
 
   // Loading state

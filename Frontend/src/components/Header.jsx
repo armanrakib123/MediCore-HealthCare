@@ -187,29 +187,30 @@ export default function Header() {
   const getDashboardLink = () => {
     if (!user) return '/login'
 
-    // Role-based dashboard routing - using correct backend API role names
-    switch (user.role) {
-      case 'Doctor':
-        return '/doctor-dashboard'
-      case 'Pharmacist':
-        return '/pharmacy-dashboard'
-      case 'Admin':
+    const role = (user.role || '').toLowerCase();
+    switch (role) {
+      case 'doctor':
+        return '/doctor-dashboard';
+      case 'pharmacist':
+        return '/pharmacy-dashboard';
+      case 'admin':
       case 'super_admin':
       case 'doctor_admin':
-        return '/admin-dashboard'
-      case 'Patient':
+        return '/admin-dashboard';
+      case 'patient':
       default:
-        return '/patient-dashboard'
+        return '/patient-dashboard';
     }
   }
 
   const getRoleIcon = () => {
-    switch (user?.role) {
-      case 'Pharmacist':
+    const role = (user?.role || '').toLowerCase();
+    switch (role) {
+      case 'pharmacist':
         return <FaPills className="role-icon" />
-      case 'Doctor':
+      case 'doctor':
         return <FaUserMd className="role-icon" />
-      case 'Admin':
+      case 'admin':
         return <FaBriefcase className="role-icon" />
       default:
         return <FaUser className="role-icon" />

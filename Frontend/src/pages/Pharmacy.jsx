@@ -13,11 +13,18 @@ export default function Pharmacy() {
   const [userLocation, setUserLocation] = useState(null);
   const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
   const [submittedTo, setSubmittedTo] = useState(null);
-  const [scrollY, setScrollY] = useState(0);
-  const [revealedElements, setRevealedElements] = useState(new Set());
+  const [sortBy, setSortBy] = useState('distance');
 
   const [pharmacies, setPharmacies] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const pharmacyImages = [
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&q=80'
+  ];
 
   const normalizePharmacy = (pharmacy, index) => {
     const name = pharmacy?.pharmacyName || pharmacy?.PharmacyName || pharmacy?.name || 'Pharmacy';
@@ -30,7 +37,7 @@ export default function Pharmacy() {
     const services = Array.isArray(pharmacy?.services || pharmacy?.Services)
       ? (pharmacy?.services || pharmacy?.Services)
       : (pharmacy?.offersDelivery || pharmacy?.OffersDelivery)
-        ? ['Home Delivery']
+        ? ['Home Delivery', 'Prescription Refills']
         : ['Prescription Refills'];
 
     let hours = 'Open 8:00 AM - 8:00 PM';
@@ -46,14 +53,14 @@ export default function Pharmacy() {
       id: pharmacy?.id || pharmacy?._id || pharmacy?.Id || pharmacy?.pharmacyId || pharmacy?.PharmacyId || `pharmacy-${index}`,
       name,
       address: addressParts.join(', ') || 'Colombo, Sri Lanka',
-      phone: pharmacy?.phone || pharmacy?.Phone || 'N/A',
-      rating: typeof pharmacy?.rating === 'number' ? pharmacy.rating : (4.6 + (index % 4) * 0.1),
+      phone: pharmacy?.phone || pharmacy?.Phone || '+94 11 234 5678',
+      rating: typeof pharmacy?.rating === 'number' ? pharmacy.rating : Number((4.6 + (index % 4) * 0.1).toFixed(1)),
       reviews: typeof pharmacy?.reviews === 'number' ? pharmacy.reviews : (150 + index * 45),
       openNow: pharmacy?.isActive ?? pharmacy?.IsActive ?? true,
       hours,
       distance: pharmacy?.distance || `${(0.8 + index * 0.6).toFixed(1)} km`,
       services,
-      image: pharmacy?.profileImageUrl || pharmacy?.ProfileImageUrl || pharmacy?.image || 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80',
+      image: pharmacy?.profileImageUrl || pharmacy?.ProfileImageUrl || pharmacy?.image || pharmacyImages[index % pharmacyImages.length],
       location: pharmacy?.location || { lat: 6.9271 + (index * 0.01), lng: 79.8612 + (index * 0.01) }
     };
   };
@@ -66,10 +73,11 @@ export default function Pharmacy() {
         const list = Array.isArray(response?.data) ? response.data : [];
         if (list.length > 0) {
           setPharmacies(list.map((item, index) => normalizePharmacy(item, index)));
+          setLoading(false);
           return;
         }
       } catch (error) {
-        console.warn('Active pharmacies API failed, checking all pharmacists:', error?.message || error);
+        console.warn('Active pharmacies API failed, checking /api/pharmacists:', error?.message || error);
       }
 
       try {
@@ -79,7 +87,7 @@ export default function Pharmacy() {
           setPharmacies(list.map((item, index) => normalizePharmacy(item, index)));
         }
       } catch (error) {
-        console.error('Failed to fetch pharmacies:', error);
+        console.error('Failed to fetch pharmacies from MongoDB:', error);
       } finally {
         setLoading(false);
       }
@@ -139,36 +147,16 @@ export default function Pharmacy() {
     setShowPrescriptionForm(false);
     setSubmittedTo(pharmacy);
 
-    let imageData = '';
-    let imageFileName = '';
-    if (file) {
-      imageFileName = file.name;
+    const token = localStorage.getItem('token');
+    if (token && file) {
       try {
         const base64 = await fileToBase64(file);
-        if (typeof base64 === 'string') {
-          const parts = base64.split(',');
-          imageData = parts.length > 1 ? parts[1] : base64;
-        }
-      } catch (error) {
-        console.warn('Failed to read prescription file:', error);
-      }
-    }
-
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await api.post('/api/patients/prescriptions/upload', {
-          imageData,
-          fileName: imageFileName || 'uploaded-prescription',
+        await api.post('/api/patients/prescriptions/upload', {
           pharmacyId,
-          pharmacyName: pharmacy?.name || undefined,
-          notes: notes || undefined
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
+          notes,
+          fileName: file.name,
+          imageData: base64
         });
-        if (!response?.data) {
-          console.warn('Upload API returned no data');
-        }
       } catch (error) {
         console.warn('Upload API failed:', error);
       }
@@ -182,6 +170,23 @@ export default function Pharmacy() {
   const mapSrc = userLocation
     ? `https://maps.google.com/maps?q=${userLocation.lat},${userLocation.lng}&ie=UTF8&output=embed&z=14`
     : `https://maps.google.com/maps?q=${encodeURIComponent(locationQuery || 'pharmacies near Colombo, Sri Lanka')}&ie=UTF8&output=embed`;
+
+  const filteredPharmacies = pharmacies
+    .filter(p => {
+      if (!locationQuery.trim() || locationQuery === 'Your Current Location') return true;
+      const q = locationQuery.toLowerCase();
+      return (
+        p.name.toLowerCase().includes(q) ||
+        p.address.toLowerCase().includes(q) ||
+        p.phone.toLowerCase().includes(q) ||
+        p.services.some(s => s.toLowerCase().includes(q))
+      );
+    })
+    .sort((a, b) => {
+      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'open') return (b.openNow ? 1 : 0) - (a.openNow ? 1 : 0);
+      return parseFloat(a.distance) - parseFloat(b.distance);
+    });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50">
@@ -198,19 +203,6 @@ export default function Pharmacy() {
       <div className="relative overflow-hidden hero-bg-animated parallax-container">
         <div className="floating-elements"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 to-indigo-400/20"></div>
-        <div 
-          className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float"
-          style={{
-            transform: `translateY(${scrollY * 0.5}px)`,
-          }}
-        ></div>
-        <div 
-          className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-float"
-          style={{
-            transform: `translateY(${scrollY * -0.3}px)`,
-            animationDelay: '-5s'
-          }}
-        ></div>
         
         <div className="relative max-w-7xl mx-auto px-6 py-16 lg:py-20">
           <div className="text-center mb-12">
@@ -229,10 +221,10 @@ export default function Pharmacy() {
             </h1>
             
             <p className="text-xl text-cyan-50 max-w-2xl mx-auto mb-10 animate-fade-in-up animate-stagger-2">
-              Search local pharmacies, upload prescriptions, and view options on the map — fast, secure, and convenient.
+              Search local pharmacies, upload prescriptions, and view live options on the map — fast, secure, and convenient.
             </p>
 
-            {/* Search Bar with Enhanced Animations */}
+            {/* Search Bar */}
             <div className="max-w-3xl mx-auto">
               <div className="bg-white/25 backdrop-blur-md rounded-2xl shadow-2xl p-3 flex flex-col lg:flex-row gap-3 glass-card animate-scale-in animate-stagger-3">
                 <div className="flex-1 relative">
@@ -241,32 +233,36 @@ export default function Pharmacy() {
                     type="text"
                     value={locationQuery}
                     onChange={(e) => setLocationQuery(e.target.value)}
-                    placeholder="Enter city, ZIP code, or address..."
-                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-100 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 outline-none transition-all text-gray-800 magnetic-hover"
+                    placeholder="Search by pharmacy name, city, or address..."
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-100 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 outline-none transition-all text-gray-800"
                   />
                 </div>
                 <div className="flex gap-3">
                   <button 
                     onClick={handleUseLocation}
                     disabled={isLocating}
-                    className="btn-enhanced px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-cyan-200 transition-all duration-300 flex items-center gap-2 disabled:opacity-50 magnetic-hover interactive-element"
+                    className="btn-enhanced px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-cyan-200 transition-all duration-300 flex items-center gap-2 disabled:opacity-50"
                   >
                     <Navigation className="w-5 h-5" />
                     {isLocating ? 'Locating...' : 'Use Location'}
                   </button>
-                  <button className="btn-enhanced px-8 py-4 bg-gray-800 hover:bg-gray-900 text-white rounded-xl font-bold shadow-lg transition-all duration-300 flex items-center gap-2 magnetic-hover interactive-element">
-                    <Search className="w-5 h-5" />
-                    Search
-                  </button>
+                  {locationQuery && (
+                    <button 
+                      onClick={() => setLocationQuery('')}
+                      className="px-4 py-4 bg-white/50 text-gray-700 hover:bg-white rounded-xl font-semibold text-sm transition-all"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Stats with Staggered Animations */}
+          {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {[
-              { icon: MapPin, label: 'Verified Pharmacies', value: '500+' },
+              { icon: MapPin, label: 'Verified Pharmacies', value: `${pharmacies.length || 5}+` },
               { icon: Users, label: 'Happy Customers', value: '50K+' },
               { icon: Shield, label: 'Secure Service', value: '100%' },
               { icon: Heart, label: 'Customer Rating', value: '4.9/5' }
@@ -274,16 +270,13 @@ export default function Pharmacy() {
               <div 
                 key={idx} 
                 className="glass-card backdrop-blur-md rounded-2xl p-6 text-center border border-white/20 card-3d-hover pharmacy-card-hover gpu-accelerated"
-                style={{
-                  animationDelay: `${idx * 0.2}s`
-                }}
               >
-                <stat.icon className="w-8 h-8 text-cyan-200 mx-auto mb-3 animate-float" style={{ animationDelay: `${idx * 0.3}s` }} />
-                <p className="text-3xl font-bold text-white mb-1 text-reveal">
+                <stat.icon className="w-8 h-8 text-cyan-200 mx-auto mb-3 animate-float" />
+                <p className="text-3xl font-bold text-white mb-1">
                   <span>{stat.value}</span>
                 </p>
-                <p className="text-sm text-cyan-100 text-reveal">
-                  <span style={{ animationDelay: `${0.5 + idx * 0.1}s` }}>{stat.label}</span>
+                <p className="text-sm text-cyan-100">
+                  <span>{stat.label}</span>
                 </p>
               </div>
             ))}
@@ -291,10 +284,10 @@ export default function Pharmacy() {
         </div>
       </div>
 
-      {/* Map Section with Scroll Reveal */}
+      {/* Map Section */}
       <div className="max-w-7xl mx-auto px-6 -mt-16 relative z-10">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 scroll-reveal">
-          <div className="h-[500px] relative">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+          <div className="h-[450px] relative">
             <iframe
               title="pharmacies-map"
               src={mapSrc}
@@ -303,7 +296,7 @@ export default function Pharmacy() {
               className="w-full h-full gpu-accelerated"
               style={{ border: 0 }}
             />
-            <div className="absolute top-4 left-4 glass-card rounded-xl shadow-lg px-4 py-2 flex items-center gap-2 animate-bounce-in">
+            <div className="absolute top-4 left-4 glass-card rounded-xl shadow-lg px-4 py-2 flex items-center gap-2 animate-bounce-in bg-white/90">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse-glow"></div>
               <span className="text-sm font-semibold text-gray-700">
                 {pharmacies.filter(p => p.openNow).length} pharmacies open now
@@ -313,42 +306,68 @@ export default function Pharmacy() {
         </div>
       </div>
 
-      {/* Pharmacies List with Scroll Reveal */}
+      {/* Pharmacies List */}
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="flex items-center justify-between mb-10 scroll-reveal">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2 animate-fade-in-left">Available Pharmacies</h2>
-            <p className="text-gray-600 animate-fade-in-left animate-stagger-1">Found {pharmacies.length} pharmacies near you</p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Available Pharmacies</h2>
+            <p className="text-gray-600">
+              {loading ? 'Loading pharmacies from database...' : `Found ${filteredPharmacies.length} pharmacies from MongoDB database`}
+            </p>
           </div>
-          <select className="px-6 py-3 border-2 border-gray-200 rounded-xl font-semibold text-gray-700 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 outline-none bg-white magnetic-hover animate-fade-in-right">
-            <option>Sort by Distance</option>
-            <option>Sort by Rating</option>
-            <option>Open Now</option>
-          </select>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-gray-500">Sort by:</span>
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-4 py-2.5 border-2 border-gray-200 rounded-xl font-semibold text-gray-700 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 outline-none bg-white transition-all text-sm"
+            >
+              <option value="distance">Distance</option>
+              <option value="rating">Rating</option>
+              <option value="open">Open Now</option>
+            </select>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {pharmacies.map((pharmacy, idx) => (
-            <div
-              key={pharmacy.id}
-              className="scroll-reveal pharmacy-card-hover gpu-accelerated"
-              style={{
-                animationDelay: `${idx * 0.1}s`
-              }}
+        {loading ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
+            <div className="w-16 h-16 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-xl font-bold text-gray-800">Loading Pharmacies</p>
+            <p className="text-gray-500 mt-1">Connecting to MongoDB database...</p>
+          </div>
+        ) : filteredPharmacies.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
+            <Pill className="w-16 h-16 text-cyan-400 mx-auto mb-4 opacity-70" />
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">No Pharmacies Found</h3>
+            <p className="text-gray-500 mb-6">No pharmacy matched your search criteria. Try a different term or clear the filter.</p>
+            <button
+              onClick={() => setLocationQuery('')}
+              className="px-6 py-3 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-700 transition-all shadow-md"
             >
-              <PharmacyCard
-                pharmacy={pharmacy}
-                onUploadPrescription={handleUploadPrescription}
-                onCall={handleCallPharmacy}
-                onGetDirections={handleGetDirections}
-                className="card-3d-hover magnetic-hover interactive-element"
-              />
-            </div>
-          ))}
-        </div>
+              View All Pharmacies
+            </button>
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-2 gap-6">
+            {filteredPharmacies.map((pharmacy) => (
+              <div
+                key={pharmacy.id}
+                className="pharmacy-card-hover gpu-accelerated"
+              >
+                <PharmacyCard
+                  pharmacy={pharmacy}
+                  onUploadPrescription={handleUploadPrescription}
+                  onCall={handleCallPharmacy}
+                  onGetDirections={handleGetDirections}
+                  className="card-3d-hover interactive-element"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Prescription Upload Modal with Enhanced Animations */}
+      {/* Prescription Upload Modal */}
       <PrescriptionModal
         pharmacy={selectedPharmacy}
         isOpen={showPrescriptionForm}

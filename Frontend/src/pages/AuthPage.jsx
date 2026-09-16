@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import RoleSelection from '../components/RoleSelection';
 import RegistrationForm from '../components/RegistrationForm';
 import LoginForm from '../components/LoginForm';
@@ -7,9 +7,49 @@ import useAuth from '../hooks/useAuth';
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
-  const [currentStep, setCurrentStep] = useState('role-selection'); // role-selection, registration, login
+  
+  // Default to login mode so users can sign in immediately
+  const initialMode = searchParams.get('mode') === 'register' ? 'role-selection' : 'login';
+  const [currentStep, setCurrentStep] = useState(initialMode); // role-selection, registration, login
   const [selectedRole, setSelectedRole] = useState(null);
+
+  // If already authenticated, redirect to appropriate role dashboard automatically
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      try {
+        const parsed = JSON.parse(userData);
+        const role = (parsed.role || '').toLowerCase();
+        if (role === 'doctor') {
+          navigate('/doctor-dashboard');
+        } else if (role === 'pharmacist') {
+          navigate('/pharmacy-dashboard');
+        } else if (role === 'admin' || role === 'super_admin' || role === 'doctor_admin') {
+          navigate('/admin-dashboard');
+        } else if (role === 'patient' || role === 'user') {
+          navigate('/patient-dashboard');
+        }
+      } catch (e) {
+        // ignore parse error
+      }
+    }
+  }, [navigate]);
+
+  const routeByRole = (roleName) => {
+    const role = (roleName || '').toLowerCase();
+    if (role === 'doctor') {
+      navigate('/doctor-dashboard');
+    } else if (role === 'pharmacist') {
+      navigate('/pharmacy-dashboard');
+    } else if (role === 'admin' || role === 'super_admin' || role === 'doctor_admin') {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/patient-dashboard');
+    }
+  };
 
   const handleRoleSelect = (role) => {
     if (role === 'login') {
@@ -21,97 +61,50 @@ const AuthPage = () => {
   };
 
   const handleRegistrationSuccess = (data) => {
-    // Handle successful registration
     console.log('Registration successful:', data);
-    
-    // Automatically login the user with the response data
     if (data.response) {
       const { token, username, role, avatarColor, avatarEmoji, profileImageUrl } = data.response;
-      
-      // Create user object from response
       const user = {
         username,
         role,
         avatarColor,
         avatarEmoji,
         profileImageUrl,
-        // Add role-specific data if available
         ...(data.response.doctorId && { doctorId: data.response.doctorId }),
         ...(data.response.pharmacyId && { pharmacyId: data.response.pharmacyId }),
         ...(data.response.patientId && { patientId: data.response.patientId })
       };
-      
-      // Login the user
       login(user, token);
-      
-      // Redirect to appropriate dashboard based on role
-      switch (role) {
-        case 'Patient':
-          navigate('/patient-dashboard');
-          break;
-        case 'Doctor':
-          navigate('/doctor-dashboard');
-          break;
-        case 'Pharmacist':
-          navigate('/pharmacy-dashboard');
-          break;
-        default:
-          // Fallback for unknown roles
-          navigate('/');
-          break;
-      }
+      routeByRole(role);
     } else {
-      // Fallback if no response data
       alert(`Registration successful as ${data.role}! Please log in.`);
       setCurrentStep('login');
     }
   };
 
   const handleLoginSuccess = (data) => {
-    // Handle successful login
     console.log('Login successful:', data);
-    
-    // If we have response data from LoginForm, use it for redirection
-    if (data.response) {
-      const { token, username, role, avatarColor, avatarEmoji, profileImageUrl } = data.response;
-      
-      // Create user object from response
-      const user = {
-        username,
-        role,
-        avatarColor,
-        avatarEmoji,
-        profileImageUrl,
-        // Add role-specific data if available
-        ...(data.response.doctorId && { doctorId: data.response.doctorId }),
-        ...(data.response.pharmacyId && { pharmacyId: data.response.pharmacyId }),
-        ...(data.response.patientId && { patientId: data.response.patientId })
-      };
-      
-      // Login the user (this is handled by LoginForm now, but we can ensure consistency)
-      login(user, token);
-      
-      // Redirect to appropriate dashboard based on role
-      switch (role) {
-        case 'Patient':
-          navigate('/patient-dashboard');
-          break;
-        case 'Doctor':
-          navigate('/doctor-dashboard');
-          break;
-        case 'Pharmacist':
-          navigate('/pharmacy-dashboard');
-          break;
-        default:
-          // Fallback for unknown roles
-          navigate('/');
-          break;
-      }
-    } else {
-      // Fallback if no response data
-      alert('Login successful! Redirecting to dashboard...');
-      navigate('/');
-    }
+    const resp = data.response || {};
+    const token = resp.token || data.token;
+    const username = resp.username || data.username;
+    const role = resp.role || data.role || 'Doctor';
+    const avatarColor = resp.avatarColor;
+    const avatarEmoji = resp.avatarEmoji;
+    const profileImageUrl = resp.profileImageUrl;
+
+    const user = {
+      username,
+      role,
+      avatarColor,
+      avatarEmoji,
+      profileImageUrl,
+      ...(resp.doctorId && { doctorId: resp.doctorId }),
+      ...(resp.pharmacyId && { pharmacyId: resp.pharmacyId }),
+      ...(resp.patientId && { patientId: resp.patientId })
+    };
+
+    login(user, token);
+    routeByRole(role);
   };
 
   const handleBack = () => {
@@ -123,46 +116,57 @@ const AuthPage = () => {
     }
   };
 
-  const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 'role-selection':
-        return (
-          <RoleSelection
-            onRoleSelect={handleRoleSelect}
-            isLoading={false}
-          />
-        );
-      
-      case 'registration':
-        return (
-          <RegistrationForm
-            role={selectedRole}
-            onBack={handleBack}
-            onSuccess={handleRegistrationSuccess}
-          />
-        );
-      
-      case 'login':
-        return (
-          <LoginForm
-            onBack={handleBack}
-            onSuccess={handleLoginSuccess}
-          />
-        );
-      
-      default:
-        return (
-          <RoleSelection
-            onRoleSelect={handleRoleSelect}
-            isLoading={false}
-          />
-        );
-    }
-  };
-
   return (
-    <div className="min-h-screen">
-      {renderCurrentStep()}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 py-8">
+      {/* Quick Navigation Toggle between Sign In and Register */}
+      <div className="max-w-md mx-auto mb-6 px-4">
+        <div className="flex bg-gray-100 p-1 rounded-2xl border border-gray-200">
+          <button
+            type="button"
+            onClick={() => setCurrentStep('login')}
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+              currentStep === 'login'
+                ? 'bg-white text-emerald-700 shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setCurrentStep('role-selection');
+              setSelectedRole(null);
+            }}
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+              currentStep === 'role-selection' || currentStep === 'registration'
+                ? 'bg-white text-emerald-700 shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Register
+          </button>
+        </div>
+      </div>
+
+      {currentStep === 'role-selection' && (
+        <RoleSelection onRoleSelect={handleRoleSelect} isLoading={false} />
+      )}
+
+      {currentStep === 'registration' && (
+        <RegistrationForm
+          role={selectedRole}
+          onBack={handleBack}
+          onSuccess={handleRegistrationSuccess}
+        />
+      )}
+
+      {currentStep === 'login' && (
+        <LoginForm
+          onBack={handleBack}
+          onSuccess={handleLoginSuccess}
+        />
+      )}
     </div>
   );
 };

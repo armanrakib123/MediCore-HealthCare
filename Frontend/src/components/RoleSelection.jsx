@@ -65,16 +65,39 @@ const RoleSelection = ({ onRoleSelect, isLoading }) => {
               
               {/* Content */}
               <div className="relative z-10 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-800 transition-colors">
                   {role.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors">
+                <p className="text-gray-600 leading-relaxed text-sm mb-6">
                   {role.description}
                 </p>
+
+                <div className="flex flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRoleSelect('login');
+                    }}
+                    className="w-full py-2.5 px-4 bg-gray-900 hover:bg-black text-white font-semibold rounded-xl text-sm transition-all shadow-md"
+                  >
+                    Sign In as {role.title}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRoleSelect(role.id);
+                    }}
+                    className="w-full py-2 px-4 bg-white/80 hover:bg-white text-gray-700 font-medium rounded-xl text-xs border border-gray-200 transition-all"
+                  >
+                    Register as {role.title}
+                  </button>
+                </div>
               </div>
 
               {/* Hover effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity duration-300 pointer-events-none" />
             </div>
           ))}
         </div>

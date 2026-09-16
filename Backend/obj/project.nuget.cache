@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "crBcNKoU7xA=",
+  "dgSpecHash": "kv/wlbiK4rU=",
   "success": true,
-  "projectFilePath": "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
+  "projectFilePath": "D:\\MediCore-HealthCare\\Backend\\HealthCarePlus.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\USER\\.nuget\\packages\\awssdk.core\\3.7.100.14\\awssdk.core.3.7.100.14.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",
@@ -35,9 +35,9 @@
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'SharpCompress' 0.30.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-6c8g-7p36-r338",
-      "projectPath": "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
+      "projectPath": "D:\\MediCore-HealthCare\\Backend\\HealthCarePlus.API.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
+      "filePath": "D:\\MediCore-HealthCare\\Backend\\HealthCarePlus.API.csproj",
       "libraryId": "SharpCompress",
       "targetGraphs": [
         "net10.0"
@@ -47,9 +47,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'Snappier' 1.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-pggp-6c3x-2xmx",
-      "projectPath": "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
+      "projectPath": "D:\\MediCore-HealthCare\\Backend\\HealthCarePlus.API.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
+      "filePath": "D:\\MediCore-HealthCare\\Backend\\HealthCarePlus.API.csproj",
       "libraryId": "Snappier",
       "targetGraphs": [
         "net10.0"
