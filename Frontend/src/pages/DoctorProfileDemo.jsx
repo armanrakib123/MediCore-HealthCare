@@ -1,4 +1,5 @@
-import React from 'react';
+import api from '../api/api';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, Star, Users, Award, Calendar, 
@@ -14,80 +15,21 @@ export default function DoctorProfileDemo() {
     navigate('/call-selection', { state: { doctorId: doctorId } });
   };
 
-  const doctors = [
-    {
-      id: 'p1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiology',
-      subSpecialty: 'Interventional Cardiology',
-      facility: 'MediCore Medical Center',
-      experience: 15,
-      rating: 4.9,
-      reviews: 234,
-      patientsServed: '5000+',
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      id: 'p2',
-      name: 'Dr. Michael Chen',
-      specialty: 'Pediatrics',
-      subSpecialty: 'Child Development',
-      facility: 'Children\'s Hospital',
-      experience: 12,
-      rating: 4.8,
-      reviews: 189,
-      patientsServed: '3200+',
-      avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      id: 'p3',
-      name: 'Dr. Emily Rodriguez',
-      specialty: 'Dermatology',
-      subSpecialty: 'Cosmetic Dermatology',
-      facility: 'Skin Care Center',
-      experience: 8,
-      rating: 4.7,
-      reviews: 156,
-      patientsServed: '2100+',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      id: 'p4',
-      name: 'Dr. James Wilson',
-      specialty: 'Orthopedics',
-      subSpecialty: 'Sports Medicine',
-      facility: 'Orthopedic Sports Center',
-      experience: 18,
-      rating: 4.8,
-      reviews: 312,
-      patientsServed: '4200+',
-      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      id: 'p5',
-      name: 'Dr. Lisa Thompson',
-      specialty: 'Neurology',
-      subSpecialty: 'Stroke Treatment',
-      facility: 'Neurological Institute',
-      experience: 14,
-      rating: 4.9,
-      reviews: 278,
-      patientsServed: '3800+',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      id: 'p6',
-      name: 'Dr. Robert Martinez',
-      specialty: 'Gastroenterology',
-      subSpecialty: 'Hepatology',
-      facility: 'Digestive Health Center',
-      experience: 11,
-      rating: 4.6,
-      reviews: 198,
-      patientsServed: '2900+',
-      avatar: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=400&q=80',
-    },
-  ];
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    const fetchDocs = async () => {
+      try {
+        const res = await api.get('/api/doctors');
+        if (Array.isArray(res.data)) {
+          setDoctors(res.data);
+        }
+      } catch (e) {
+        console.warn('Failed to load doctors in demo:', e);
+      }
+    };
+    fetchDocs();
+  }, []);
 
   const features = [
     'Beautiful gradient backgrounds with animations',

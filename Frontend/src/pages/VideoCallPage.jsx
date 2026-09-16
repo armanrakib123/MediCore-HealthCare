@@ -1,3 +1,4 @@
+import api from '../api/api';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { 
@@ -25,166 +26,41 @@ export default function VideoCallPage() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Comprehensive doctor database matching DoctorProfile.jsx
-  const doctorsDatabase = {
-    'p1': {
-      id: 'p1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiology',
-      subSpecialty: 'Interventional Cardiology',
-      facility: 'MediCore Medical Center',
-      address: '123 Medical Plaza, Downtown Medical District',
-      phone: '+1 (555) 123-4567',
-      email: 'sarah.johnson@healthcare.com',
-      experience: 15,
-      rating: 4.9,
-      reviews: 234,
-      patientsServed: '5000+',
-      successRate: 98,
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80',
-      status: 'online',
-      consultationFee: 150,
-      videoConsultationFee: 120,
-      languages: ['English', 'Spanish', 'French'],
-      verified: true
-    },
-    'p2': {
-      id: 'p2',
-      name: 'Dr. Michael Chen',
-      specialty: 'Pediatrics',
-      subSpecialty: 'Child Development',
-      facility: 'Children\'s Hospital',
-      address: '456 Pediatric Way, Children\'s District',
-      phone: '+1 (555) 234-5678',
-      email: 'michael.chen@healthcare.com',
-      experience: 12,
-      rating: 4.8,
-      reviews: 189,
-      patientsServed: '3200+',
-      successRate: 96,
-      avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80',
-      status: 'online',
-      consultationFee: 120,
-      videoConsultationFee: 100,
-      languages: ['English', 'Mandarin', 'Cantonese'],
-      verified: true
-    },
-    'p3': {
-      id: 'p3',
-      name: 'Dr. Emily Rodriguez',
-      specialty: 'Dermatology',
-      subSpecialty: 'Cosmetic Dermatology',
-      facility: 'Skin Care Center',
-      address: '789 Dermatology Blvd, Beauty District',
-      phone: '+1 (555) 345-6789',
-      email: 'emily.rodriguez@healthcare.com',
-      experience: 8,
-      rating: 4.7,
-      reviews: 156,
-      patientsServed: '2100+',
-      successRate: 94,
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-      status: 'online',
-      consultationFee: 140,
-      videoConsultationFee: 110,
-      languages: ['English', 'Spanish'],
-      verified: true
-    },
-    'p4': {
-      id: 'p4',
-      name: 'Dr. James Wilson',
-      specialty: 'Orthopedics',
-      subSpecialty: 'Sports Medicine',
-      facility: 'Orthopedic Sports Center',
-      address: '321 Sports Medicine Ave, Athletic District',
-      phone: '+1 (555) 456-7890',
-      email: 'james.wilson@healthcare.com',
-      experience: 18,
-      rating: 4.8,
-      reviews: 312,
-      patientsServed: '4200+',
-      successRate: 97,
-      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80',
-      status: 'online',
-      consultationFee: 180,
-      videoConsultationFee: 150,
-      languages: ['English', 'Spanish', 'Portuguese'],
-      verified: true
-    },
-    'p5': {
-      id: 'p5',
-      name: 'Dr. Lisa Thompson',
-      specialty: 'Neurology',
-      subSpecialty: 'Stroke Treatment',
-      facility: 'Neurological Institute',
-      address: '654 Brain Health Blvd, Medical District',
-      phone: '+1 (555) 567-8901',
-      email: 'lisa.thompson@healthcare.com',
-      experience: 14,
-      rating: 4.9,
-      reviews: 278,
-      patientsServed: '3800+',
-      successRate: 95,
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
-      status: 'online',
-      consultationFee: 200,
-      videoConsultationFee: 160,
-      languages: ['English', 'Mandarin', 'French'],
-      verified: true
-    },
-    'p6': {
-      id: 'p6',
-      name: 'Dr. Robert Martinez',
-      specialty: 'Gastroenterology',
-      subSpecialty: 'Hepatology',
-      facility: 'Digestive Health Center',
-      address: '987 Gastroenterology Way, Digestive District',
-      phone: '+1 (555) 678-9012',
-      email: 'robert.martinez@healthcare.com',
-      experience: 11,
-      rating: 4.6,
-      reviews: 198,
-      patientsServed: '2900+',
-      successRate: 93,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      status: 'online',
-      consultationFee: 160,
-      videoConsultationFee: 130,
-      languages: ['English', 'Spanish', 'Italian'],
-      verified: true
-    }
-  };
-
   const [messages, setMessages] = useState([]);
 
-  // Load doctor data from URL params or navigation state
+  // Load doctor data from MongoDB backend API
   useEffect(() => {
     const loadDoctorData = async () => {
       setLoading(true);
-      
-      // Get doctor ID from URL params first, then navigation state, default to p1
-      const resolvedDoctorId = doctorId || location.state?.doctorId || 'p1';
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const doctorData = doctorsDatabase[resolvedDoctorId];
-      if (doctorData) {
-        setDoctor(doctorData);
-        
-        // Initialize chat with personalized welcome message
-        setMessages([
-          { 
-            id: 1, 
-            sender: 'doctor', 
-            text: `Hello! I'm ${doctorData.name}. I'll be with you shortly for your video consultation.`, 
-            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) 
+      const resolvedDoctorId = doctorId || location.state?.doctorId || null;
+      try {
+        let doctorData = null;
+        if (resolvedDoctorId) {
+          const res = await api.get(`/api/doctors/${resolvedDoctorId}`);
+          if (res.data) doctorData = res.data;
+        }
+        if (!doctorData) {
+          const resAll = await api.get('/api/doctors');
+          if (Array.isArray(resAll.data) && resAll.data.length > 0) {
+            doctorData = resAll.data[0];
           }
-        ]);
-      } else {
-        setDoctor(null);
+        }
+        if (doctorData) {
+          setDoctor(doctorData);
+          setMessages([
+            { 
+              id: 1, 
+              sender: 'doctor', 
+              text: `Hello! I'm ${doctorData.name}. I'll be with you shortly for your video consultation.`, 
+              time: 'Just now' 
+            }
+          ]);
+        }
+      } catch (e) {
+        console.error('Failed to load doctor for video call:', e);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadDoctorData();

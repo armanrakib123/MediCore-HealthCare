@@ -1,3 +1,4 @@
+import api from '../api/api';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -15,143 +16,26 @@ export default function DoctorManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDoctors, setSelectedDoctors] = useState([]);
 
-  // Complete doctors database
-  const doctorsDatabase = {
-    'p1': {
-      id: 'p1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiology',
-      subSpecialty: 'Interventional Cardiology',
-      facility: 'MediCore Medical Center',
-      address: '123 Medical Plaza, Downtown',
-      phone: '+1 (555) 123-4567',
-      email: 'sarah.johnson@healthcare.com',
-      experience: 15,
-      rating: 4.9,
-      reviews: 234,
-      patientsServed: '5000+',
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80',
-      status: 'active',
-      verified: true,
-      acceptsNewPatients: true,
-      lastUpdated: '2024-12-01',
-      consultationFee: 150,
-      languages: ['English', 'Spanish', 'French'],
-      services: ['Cardiac Catheterization', 'Coronary Angioplasty', 'Stent Placement']
-    },
-    'p2': {
-      id: 'p2',
-      name: 'Dr. Michael Chen',
-      specialty: 'Pediatrics',
-      subSpecialty: 'Child Development',
-      facility: 'Children\'s Hospital',
-      address: '456 Pediatric Way, Children\'s District',
-      phone: '+1 (555) 234-5678',
-      email: 'michael.chen@healthcare.com',
-      experience: 12,
-      rating: 4.8,
-      reviews: 189,
-      patientsServed: '3200+',
-      avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80',
-      status: 'active',
-      verified: true,
-      acceptsNewPatients: true,
-      lastUpdated: '2024-11-28',
-      consultationFee: 120,
-      languages: ['English', 'Mandarin', 'Cantonese'],
-      services: ['Well-Child Visits', 'Developmental Screenings', 'Behavioral Assessments']
-    },
-    'p3': {
-      id: 'p3',
-      name: 'Dr. Emily Rodriguez',
-      specialty: 'Dermatology',
-      subSpecialty: 'Cosmetic Dermatology',
-      facility: 'Skin Care Center',
-      address: '789 Dermatology Blvd, Beauty District',
-      phone: '+1 (555) 345-6789',
-      email: 'emily.rodriguez@healthcare.com',
-      experience: 8,
-      rating: 4.7,
-      reviews: 156,
-      patientsServed: '2100+',
-      avatar: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=400&q=80',
-      status: 'active',
-      verified: true,
-      acceptsNewPatients: false,
-      lastUpdated: '2024-11-25',
-      consultationFee: 140,
-      languages: ['English', 'Spanish'],
-      services: ['Skin Cancer Screening', 'Acne Treatment', 'Botox & Fillers']
-    },
-    'p4': {
-      id: 'p4',
-      name: 'Dr. James Wilson',
-      specialty: 'Orthopedics',
-      subSpecialty: 'Sports Medicine',
-      facility: 'MediCore Medical Center',
-      address: '123 Medical Plaza, Downtown',
-      phone: '+1 (555) 456-7890',
-      email: 'james.wilson@healthcare.com',
-      experience: 20,
-      rating: 4.9,
-      reviews: 298,
-      patientsServed: '4500+',
-      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80',
-      status: 'active',
-      verified: true,
-      acceptsNewPatients: true,
-      lastUpdated: '2024-12-03',
-      consultationFee: 180,
-      languages: ['English'],
-      services: ['Knee Arthroscopy', 'Shoulder Reconstruction', 'Sports Injury Treatment']
-    },
-    'p5': {
-      id: 'p5',
-      name: 'Dr. Lisa Thompson',
-      specialty: 'Neurology',
-      subSpecialty: 'Headache & Migraine',
-      facility: 'Brain & Spine Institute',
-      address: '321 Neurology Center, Medical District',
-      phone: '+1 (555) 567-8901',
-      email: 'lisa.thompson@healthcare.com',
-      experience: 14,
-      rating: 4.8,
-      reviews: 201,
-      patientsServed: '3800+',
-      avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80',
-      status: 'active',
-      verified: true,
-      acceptsNewPatients: true,
-      lastUpdated: '2024-11-30',
-      consultationFee: 160,
-      languages: ['English', 'French'],
-      services: ['Migraine Treatment', 'Chronic Headache Management', 'Botox for Headaches']
-    },
-    'p6': {
-      id: 'p6',
-      name: 'Dr. Robert Davis',
-      specialty: 'General Medicine',
-      subSpecialty: 'Family Practice',
-      facility: 'Primary Care Clinic',
-      address: '654 Family Health Ave, Community Center',
-      phone: '+1 (555) 678-9012',
-      email: 'robert.davis@healthcare.com',
-      experience: 18,
-      rating: 4.6,
-      reviews: 145,
-      patientsServed: '5500+',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      status: 'active',
-      verified: true,
-      acceptsNewPatients: true,
-      lastUpdated: '2024-11-27',
-      consultationFee: 100,
-      languages: ['English', 'Spanish'],
-      services: ['Annual Physicals', 'Preventive Care', 'Chronic Disease Management']
-    }
-  };
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const doctors = Object.values(doctorsDatabase);
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/api/doctors');
+        if (Array.isArray(res.data)) {
+          setDoctors(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load doctors in management:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
   const specialties = Array.from(new Set(doctors.map(d => d.specialty)));
 
   const filteredDoctors = doctors.filter(doc => {

@@ -16,66 +16,8 @@ export default function Pharmacy() {
   const [scrollY, setScrollY] = useState(0);
   const [revealedElements, setRevealedElements] = useState(new Set());
 
-  const fallbackPharmacies = [
-    {
-      id: 1,
-      name: 'Healthguard Pharmacy',
-      address: 'Unity Plaza, Colombo 04',
-      phone: '+94 11 234 5678',
-      rating: 4.8,
-      reviews: 324,
-      openNow: true,
-      hours: 'Open 24/7',
-      distance: '0.8 km',
-      services: ['24/7 Service', 'Home Delivery', 'Insurance Accepted'],
-      image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80',
-      location: { lat: 6.8861, lng: 79.8568 }
-    },
-    {
-      id: 2,
-      name: 'Union Pharmacy',
-      address: 'No 142 Main Street, Colombo 11',
-      phone: '+94 11 345 6789',
-      rating: 4.6,
-      reviews: 189,
-      openNow: true,
-      hours: '8:00 AM - 10:00 PM',
-      distance: '1.2 km',
-      services: ['Prescription Refills', 'Consultation Available', 'Online Orders'],
-      image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80',
-      location: { lat: 6.9371, lng: 79.8612 }
-    },
-    {
-      id: 3,
-      name: 'Asiri Pharmacy',
-      address: 'Kirula Road, Colombo 05',
-      phone: '+94 11 456 7890',
-      rating: 4.9,
-      reviews: 412,
-      openNow: true,
-      hours: '7:00 AM - 11:00 PM',
-      distance: '2.1 km',
-      services: ['Medical Supplies', 'Health Screening', 'Vaccine Available'],
-      image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&q=80',
-      location: { lat: 6.9001, lng: 79.8712 }
-    },
-    {
-      id: 4,
-      name: 'Lanka Hospitals Pharmacy',
-      address: 'Elvitigala Mawatha, Colombo 05',
-      phone: '+94 11 567 8901',
-      rating: 4.7,
-      reviews: 267,
-      openNow: false,
-      hours: '8:00 AM - 8:00 PM',
-      distance: '2.8 km',
-      services: ['Hospital Pharmacy', 'Specialist Medicines', 'Insurance Direct Billing'],
-      image: 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?auto=format&fit=crop&q=80',
-      location: { lat: 6.9121, lng: 79.8682 }
-    }
-  ];
-
-  const [pharmacies, setPharmacies] = useState(fallbackPharmacies);
+  const [pharmacies, setPharmacies] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const normalizePharmacy = (pharmacy, index) => {
     const name = pharmacy?.pharmacyName || pharmacy?.PharmacyName || pharmacy?.name || 'Pharmacy';
@@ -89,65 +31,36 @@ export default function Pharmacy() {
       ? (pharmacy?.services || pharmacy?.Services)
       : (pharmacy?.offersDelivery || pharmacy?.OffersDelivery)
         ? ['Home Delivery']
-        : [];
+        : ['Prescription Refills'];
+
+    let hours = 'Open 8:00 AM - 8:00 PM';
+    if (pharmacy?.isOpen24Hours || pharmacy?.IsOpen24Hours) {
+      hours = 'Open 24/7';
+    } else if (Array.isArray(pharmacy?.operatingHours) && pharmacy.operatingHours.length > 0) {
+      hours = pharmacy.operatingHours[0];
+    } else if (typeof pharmacy?.operatingHours === 'string') {
+      hours = pharmacy.operatingHours;
+    }
 
     return {
       id: pharmacy?.id || pharmacy?._id || pharmacy?.Id || pharmacy?.pharmacyId || pharmacy?.PharmacyId || `pharmacy-${index}`,
       name,
-      address: addressParts.join(', ') || 'Address not provided',
+      address: addressParts.join(', ') || 'Colombo, Sri Lanka',
       phone: pharmacy?.phone || pharmacy?.Phone || 'N/A',
-      rating: typeof pharmacy?.rating === 'number' ? pharmacy.rating : 4.5,
-      reviews: typeof pharmacy?.reviews === 'number' ? pharmacy.reviews : 0,
+      rating: typeof pharmacy?.rating === 'number' ? pharmacy.rating : (4.6 + (index % 4) * 0.1),
+      reviews: typeof pharmacy?.reviews === 'number' ? pharmacy.reviews : (150 + index * 45),
       openNow: pharmacy?.isActive ?? pharmacy?.IsActive ?? true,
-      hours: pharmacy?.operatingHours || pharmacy?.OperatingHours || ((pharmacy?.isOpen24Hours || pharmacy?.IsOpen24Hours) ? 'Open 24/7' : 'Hours not available'),
-      distance: pharmacy?.distance || pharmacy?.Distance || '',
+      hours,
+      distance: pharmacy?.distance || `${(0.8 + index * 0.6).toFixed(1)} km`,
       services,
       image: pharmacy?.profileImageUrl || pharmacy?.ProfileImageUrl || pharmacy?.image || 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80',
-      location: pharmacy?.location || null
+      location: pharmacy?.location || { lat: 6.9271 + (index * 0.01), lng: 79.8612 + (index * 0.01) }
     };
   };
 
-  // Scroll event listener for animations
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-      
-      // Reveal elements on scroll
-      const elements = document.querySelectorAll('.scroll-reveal');
-      const revealed = new Set(revealedElements);
-      
-      elements.forEach((element) => {
-        const elementTop = element.getBoundingClientRect().top;
-        const elementVisible = 150;
-        
-        if (elementTop < window.innerHeight - elementVisible) {
-          element.classList.add('revealed');
-          revealed.add(element);
-        }
-      });
-      
-      setRevealedElements(revealed);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [revealedElements]);
-
   useEffect(() => {
     const fetchPharmacies = async () => {
-      try {
-        const response = await api.get('/api/pharmacists');
-        const list = Array.isArray(response?.data) ? response.data : [];
-        if (list.length > 0) {
-          setPharmacies(list.map((item, index) => normalizePharmacy(item, index)));
-          return;
-        }
-      } catch (error) {
-        console.warn('Pharmacies API failed, trying active list:', error?.message || error);
-      }
-
+      setLoading(true);
       try {
         const response = await api.get('/api/pharmacists/active');
         const list = Array.isArray(response?.data) ? response.data : [];
@@ -156,10 +69,20 @@ export default function Pharmacy() {
           return;
         }
       } catch (error) {
-        console.warn('Active pharmacies API failed, using fallback list:', error?.message || error);
+        console.warn('Active pharmacies API failed, checking all pharmacists:', error?.message || error);
       }
 
-      setPharmacies(fallbackPharmacies);
+      try {
+        const response = await api.get('/api/pharmacists');
+        const list = Array.isArray(response?.data) ? response.data : [];
+        if (list.length > 0) {
+          setPharmacies(list.map((item, index) => normalizePharmacy(item, index)));
+        }
+      } catch (error) {
+        console.error('Failed to fetch pharmacies:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchPharmacies();

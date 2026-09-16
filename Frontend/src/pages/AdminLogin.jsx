@@ -5,6 +5,8 @@ import {
   Heart, ArrowLeft
 } from 'lucide-react';
 
+import api from '../api/api';
+
 export default function AdminLogin() {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({
@@ -24,19 +26,6 @@ export default function AdminLogin() {
     if (error) setError('');
   };
 
-  const validateCredentials = (username, password) => {
-    // Mock authentication - in real app, this would be an API call
-    const validCredentials = [
-      { username: 'admin', password: 'admin123', role: 'super_admin' },
-      { username: 'doctor_admin', password: 'doctor123', role: 'doctor_admin' },
-      { username: 'staff', password: 'staff123', role: 'staff' }
-    ];
-    
-    return validCredentials.find(
-      cred => cred.username === username && cred.password === password
-    );
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     
@@ -49,17 +38,21 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const validUser = validateCredentials(credentials.username, credentials.password);
-      
-      if (validUser) {
-        // Store authentication data
+      const response = await api.post('/api/auth/login', {
+        usernameOrEmail: credentials.username.trim(),
+        password: credentials.password
+      });
+
+      const data = response.data;
+      if (data && data.token) {
+        // Store real JWT token and user info
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data));
+
         const authData = {
           isAuthenticated: true,
-          username: validUser.username,
-          role: validUser.role,
+          username: data.username,
+          role: data.role,
           loginTime: new Date().toISOString()
         };
         
@@ -70,20 +63,17 @@ export default function AdminLogin() {
           detail: { type: 'admin-login', user: authData } 
         }));
         
-        // Show success message briefly
         setError('');
         
         // Redirect to admin dashboard
-        setTimeout(() => {
-          navigate('/admin-dashboard');
-        }, 500);
-        
+        navigate('/admin-dashboard');
       } else {
-        setError('Invalid username or password. Please try again.');
+        setError('Invalid admin credentials. Please try again.');
       }
-      
     } catch (err) {
-      setError('Login failed. Please check your connection and try again.');
+      console.error('Admin login error:', err);
+      const msg = err.response?.data?.message || err.response?.data?.title || 'Invalid username or password. Please try again.';
+      setError(msg);
     } finally {
       setLoading(false);
     }

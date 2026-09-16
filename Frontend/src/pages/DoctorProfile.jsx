@@ -6,6 +6,7 @@ import {
   ChevronRight, ChevronLeft, Stethoscope, FileText, DollarSign, Languages, Hospital,
   User, Sparkles, ThumbsUp, Activity, Globe
 } from 'lucide-react';
+import api from '../api/api';
 
 export default function DoctorProfile() {
   const navigate = useNavigate();
@@ -19,414 +20,44 @@ export default function DoctorProfile() {
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
 
-  // Enhanced doctors database with more comprehensive data
-  const doctorsDatabase = {
-    'p1': {
-      id: 'p1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiology',
-      subSpecialty: 'Interventional Cardiology',
-      facility: 'MediCore Medical Center',
-      address: '123 Medical Plaza, Downtown Medical District',
-      phone: '+1 (555) 123-4567',
-      email: 'sarah.johnson@healthcare.com',
-      experience: 15,
-      rating: 4.9,
-      reviews: 234,
-      patientsServed: '5000+',
-      successRate: 98,
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80',
-      coverImage: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=1200&q=80',
-      about: 'Dr. Sarah Johnson is a board-certified cardiologist with over 15 years of experience in interventional cardiology. She specializes in minimally invasive cardiac procedures and has pioneered several innovative techniques in her field. Dr. Johnson is committed to providing compassionate, patient-centered care and staying at the forefront of cardiovascular medicine. Her research has been published in numerous medical journals and she regularly speaks at international cardiology conferences.',
-      philosophy: 'I believe in treating not just the condition, but the whole person. Every patient deserves personalized care that considers their unique circumstances, preferences, and goals.',
-      achievements: [
-        'Top Cardiologist Award 2023',
-        'Innovation in Cardiac Care Recognition',
-        'Patient Safety Excellence Award',
-        'Research Excellence in Interventional Cardiology'
-      ],
-      publications: [
-        'Advanced Techniques in Minimally Invasive Cardiac Procedures - Journal of Cardiology 2023',
-        'Patient Outcomes in Interventional Cardiology - Medical Review 2022',
-        'Future of Cardiac Care Technology - Healthcare Innovation 2022'
-      ],
-      education: [
-        { degree: 'MD, Cardiology', institution: 'Harvard Medical School', year: '2008', honors: 'Summa Cum Laude' },
-        { degree: 'Fellowship, Interventional Cardiology', institution: 'Mayo Clinic', year: '2011', honors: 'Outstanding Fellow Award' },
-        { degree: 'BS, Biology', institution: 'Stanford University', year: '2004', honors: 'Phi Beta Kappa' }
-      ],
-      certifications: [
-        'Board Certified in Cardiovascular Disease',
-        'Board Certified in Interventional Cardiology',
-        'Advanced Cardiac Life Support (ACLS)',
-        'Fellow of American College of Cardiology',
-        'Registered Cardiovascular Interventional Specialist'
-      ],
-      languages: ['English', 'Spanish', 'French'],
-      insuranceAccepted: ['BlueCross BlueShield', 'Aetna', 'UnitedHealthcare', 'Medicare', 'Medicaid', 'Cigna', 'Humana', 'Kaiser Permanente'],
-      availability: {
-        monday: ['9:00 AM', '10:00 AM', '2:00 PM', '3:00 PM'],
-        tuesday: ['9:00 AM', '11:00 AM', '1:00 PM', '4:00 PM'],
-        wednesday: ['10:00 AM', '2:00 PM', '3:00 PM'],
-        thursday: ['9:00 AM', '10:00 AM', '2:00 PM', '4:00 PM'],
-        friday: ['9:00 AM', '11:00 AM', '1:00 PM']
-      },
-      services: [
-        'Cardiac Catheterization',
-        'Coronary Angioplasty',
-        'Stent Placement',
-        'Heart Disease Management',
-        'Preventive Cardiology',
-        'Echocardiography',
-        'Cardiac Rehabilitation',
-        'Hypertension Management'
-      ],
-      consultationFee: 150,
-      followUpFee: 100,
-      videoConsultationFee: 120,
-      voiceConsultationFee: 100
-    },
-    'p2': {
-      id: 'p2',
-      name: 'Dr. Michael Chen',
-      specialty: 'Pediatrics',
-      subSpecialty: 'Child Development',
-      facility: 'Children\'s Hospital',
-      address: '456 Pediatric Way, Children\'s District',
-      phone: '+1 (555) 234-5678',
-      email: 'michael.chen@healthcare.com',
-      experience: 12,
-      rating: 4.8,
-      reviews: 189,
-      patientsServed: '3200+',
-      successRate: 96,
-      avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80',
-      coverImage: 'https://images.unsplash.com/photo-1515488042361-ee00b0cffk9a?auto=format&fit=crop&w=1200&q=80',
-      about: 'Dr. Michael Chen is a dedicated pediatrician specializing in child development with over 12 years of experience. He is passionate about helping children reach their full potential and providing comprehensive care for families. Dr. Chen has extensive training in developmental disorders and childhood behavioral health.',
-      philosophy: 'Every child is unique and deserves care that honors their individual journey. I work with families to create supportive environments where children can thrive.',
-      achievements: [
-        'Pediatric Excellence Award 2023',
-        'Child Development Specialist Certification',
-        'Family-Centered Care Recognition'
-      ],
-      publications: [
-        'Early Intervention in Child Development - Pediatric Journal 2023',
-        'Family Dynamics in Child Health - Child Health Review 2022'
-      ],
-      education: [
-        { degree: 'MD, Pediatrics', institution: 'Johns Hopkins School of Medicine', year: '2011', honors: 'Alpha Omega Alpha' },
-        { degree: 'Fellowship, Developmental Pediatrics', institution: 'Children\'s Hospital of Philadelphia', year: '2014', honors: 'Research Excellence Award' },
-        { degree: 'BS, Psychology', institution: 'UC Berkeley', year: '2007', honors: 'Magna Cum Laude' }
-      ],
-      certifications: [
-        'Board Certified in Pediatrics',
-        'Developmental-Behavioral Pediatrics',
-        'Pediatric Advanced Life Support (PALS)',
-        'Fellow of American Academy of Pediatrics'
-      ],
-      languages: ['English', 'Mandarin', 'Cantonese'],
-      insuranceAccepted: ['BlueCross BlueShield', 'Aetna', 'UnitedHealthcare', 'Kaiser Permanente', 'Medicaid', 'CHIP'],
-      availability: {
-        monday: ['8:00 AM', '9:00 AM', '1:00 PM', '2:00 PM'],
-        tuesday: ['9:00 AM', '10:00 AM', '3:00 PM'],
-        wednesday: ['8:00 AM', '2:00 PM', '4:00 PM'],
-        thursday: ['9:00 AM', '11:00 AM', '1:00 PM'],
-        friday: ['8:00 AM', '9:00 AM', '3:00 PM']
-      },
-      services: [
-        'Well-Child Visits',
-        'Developmental Screenings',
-        'Behavioral Assessments',
-        'Immunizations',
-        'School Physicals',
-        'Chronic Disease Management',
-        'ADHD Evaluation',
-        'Autism Spectrum Disorder Support'
-      ],
-      consultationFee: 120,
-      followUpFee: 80,
-      videoConsultationFee: 100,
-      voiceConsultationFee: 85
-    },
-    'p3': {
-      id: 'p3',
-      name: 'Dr. Emily Rodriguez',
-      specialty: 'Dermatology',
-      subSpecialty: 'Cosmetic Dermatology',
-      facility: 'Skin Care Center',
-      address: '789 Dermatology Blvd, Beauty District',
-      phone: '+1 (555) 345-6789',
-      email: 'emily.rodriguez@healthcare.com',
-      experience: 8,
-      rating: 4.7,
-      reviews: 156,
-      patientsServed: '2100+',
-      successRate: 94,
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-      coverImage: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=1200&q=80',
-      about: 'Dr. Emily Rodriguez is a board-certified dermatologist with expertise in both medical and cosmetic dermatology. She has been helping patients achieve healthy, beautiful skin for over 8 years. Dr. Rodriguez stays current with the latest advances in dermatological treatments and cosmetic procedures.',
-      philosophy: 'Healthy skin is the foundation of confidence. I combine medical expertise with cosmetic artistry to help patients look and feel their best.',
-      achievements: [
-        'Dermatology Innovation Award 2023',
-        'Cosmetic Dermatology Excellence',
-        'Patient Satisfaction Recognition'
-      ],
-      publications: [
-        'Advances in Cosmetic Dermatology - Dermatology Review 2023',
-        'Skin Health and Aging - Medical Aesthetics Journal 2022'
-      ],
-      education: [
-        { degree: 'MD, Dermatology', institution: 'UCLA School of Medicine', year: '2015', honors: 'Alpha Omega Alpha' },
-        { degree: 'Residency, Dermatology', institution: 'Mayo Clinic', year: '2019', honors: 'Chief Resident' },
-        { degree: 'BS, Chemistry', institution: 'USC', year: '2011', honors: 'Summa Cum Laude' }
-      ],
-      certifications: [
-        'Board Certified in Dermatology',
-        'Cosmetic Dermatology Fellowship',
-        'American Board of Dermatology',
-        'American Society for Dermatologic Surgery'
-      ],
-      languages: ['English', 'Spanish'],
-      insuranceAccepted: ['BlueCross BlueShield', 'Aetna', 'Cigna', 'Medicare', 'Self-pay options available'],
-      availability: {
-        monday: ['9:00 AM', '10:30 AM', '2:00 PM'],
-        tuesday: ['9:00 AM', '11:00 AM', '2:30 PM'],
-        wednesday: ['10:00 AM', '1:00 PM', '3:00 PM'],
-        thursday: ['9:30 AM', '11:30 AM', '2:00 PM'],
-        friday: ['9:00 AM', '10:00 AM', '2:00 PM']
-      },
-      services: [
-        'Skin Cancer Screening',
-        'Acne Treatment',
-        'Botox & Fillers',
-        'Laser Treatments',
-        'Skin Rejuvenation',
-        'Mole Removal',
-        'Rosacea Treatment',
-        'Anti-Aging Therapies'
-      ],
-      consultationFee: 140,
-      followUpFee: 90,
-      videoConsultationFee: 110,
-      voiceConsultationFee: 95
-    },
-    'p4': {
-      id: 'p4',
-      name: 'Dr. James Wilson',
-      specialty: 'Orthopedics',
-      subSpecialty: 'Sports Medicine',
-      facility: 'Orthopedic Sports Center',
-      address: '321 Sports Medicine Ave, Athletic District',
-      phone: '+1 (555) 456-7890',
-      email: 'james.wilson@healthcare.com',
-      experience: 18,
-      rating: 4.8,
-      reviews: 312,
-      patientsServed: '4200+',
-      successRate: 97,
-      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80',
-      coverImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?auto=format&fit=crop&w=1200&q=80',
-      about: 'Dr. James Wilson is a renowned orthopedic surgeon specializing in sports medicine with over 18 years of experience. He has treated professional athletes and weekend warriors alike, helping them return to peak performance. Dr. Wilson is known for his innovative minimally invasive techniques and comprehensive approach to musculoskeletal care.',
-      philosophy: 'Every athlete deserves to perform at their best. I combine cutting-edge surgical techniques with personalized rehabilitation to help my patients achieve their goals.',
-      achievements: [
-        'Sports Medicine Excellence Award 2023',
-        'Team Physician for State Championship Teams',
-        'Minimally Invasive Surgery Innovation',
-        'Athletic Performance Enhancement Recognition'
-      ],
-      publications: [
-        'Advanced Arthroscopic Techniques in Sports Medicine - Journal of Orthopedic Surgery 2023',
-        'Recovery Optimization in Athletic Injuries - Sports Medicine Review 2022',
-        'Preventive Strategies for Sports-Related Injuries - Athletic Health Journal 2022'
-      ],
-      education: [
-        { degree: 'MD, Orthopedic Surgery', institution: 'Johns Hopkins School of Medicine', year: '2005', honors: 'Alpha Omega Alpha' },
-        { degree: 'Fellowship, Sports Medicine', institution: 'Hospital for Special Surgery', year: '2009', honors: 'Outstanding Fellow Award' },
-        { degree: 'BS, Kinesiology', institution: 'University of California, Berkeley', year: '2001', honors: 'Summa Cum Laude' }
-      ],
-      certifications: [
-        'Board Certified in Orthopedic Surgery',
-        'Sports Medicine Subspecialty Certification',
-        'American Board of Orthopedic Surgery',
-        'Fellow of American Academy of Orthopedic Surgeons',
-        'Arthroscopy Association of North America'
-      ],
-      languages: ['English', 'Spanish', 'Portuguese'],
-      insuranceAccepted: ['BlueCross BlueShield', 'Aetna', 'UnitedHealthcare', 'Medicare', 'Cigna', 'Humana', 'Workers Compensation'],
-      availability: {
-        monday: ['7:00 AM', '8:00 AM', '1:00 PM', '2:00 PM'],
-        tuesday: ['7:00 AM', '9:00 AM', '3:00 PM'],
-        wednesday: ['8:00 AM', '1:00 PM', '4:00 PM'],
-        thursday: ['7:00 AM', '8:00 AM', '2:00 PM', '3:00 PM'],
-        friday: ['7:00 AM', '9:00 AM', '1:00 PM']
-      },
-      services: [
-        'Arthroscopic Surgery',
-        'Knee Reconstruction',
-        'Shoulder Repair',
-        'Sports Injury Treatment',
-        'Joint Replacement',
-        'Fracture Care',
-        'Physical Therapy Coordination',
-        'Performance Optimization'
-      ],
-      consultationFee: 180,
-      followUpFee: 120,
-      videoConsultationFee: 150,
-      voiceConsultationFee: 125
-    },
-    'p5': {
-      id: 'p5',
-      name: 'Dr. Lisa Thompson',
-      specialty: 'Neurology',
-      subSpecialty: 'Stroke Treatment',
-      facility: 'Neurological Institute',
-      address: '654 Brain Health Blvd, Medical District',
-      phone: '+1 (555) 567-8901',
-      email: 'lisa.thompson@healthcare.com',
-      experience: 14,
-      rating: 4.9,
-      reviews: 278,
-      patientsServed: '3800+',
-      successRate: 95,
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
-      coverImage: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=1200&q=80',
-      about: 'Dr. Lisa Thompson is a leading neurologist specializing in stroke treatment and neurological emergency care with over 14 years of experience. She has been instrumental in developing rapid response protocols that have saved countless lives. Dr. Thompson is passionate about patient education and preventive care in neurological health.',
-      philosophy: 'Time is brain in neurological emergencies. Every second counts, and I am committed to providing rapid,精准 care while treating each patient with compassion and dignity.',
-      achievements: [
-        'Neurological Excellence Award 2023',
-        'Stroke Care Innovation Recognition',
-        'Patient Safety Leadership Award',
-        'Research Excellence in Stroke Treatment'
-      ],
-      publications: [
-        'Rapid Response Protocols in Stroke Care - Neurology Journal 2023',
-        'Advanced Neuroimaging in Emergency Neurology - Stroke Review 2022',
-        'Patient Outcomes in Acute Stroke Treatment - Medical Emergency Journal 2022'
-      ],
-      education: [
-        { degree: 'MD, Neurology', institution: 'Harvard Medical School', year: '2009', honors: 'Alpha Omega Alpha' },
-        { degree: 'Fellowship, Vascular Neurology', institution: 'Mayo Clinic', year: '2012', honors: 'Outstanding Fellow Award' },
-        { degree: 'BS, Neuroscience', institution: 'MIT', year: '2005', honors: 'Phi Beta Kappa' }
-      ],
-      certifications: [
-        'Board Certified in Neurology',
-        'Vascular Neurology Subspecialty',
-        'American Board of Psychiatry and Neurology',
-        'Advanced Cardiac Life Support (ACLS)',
-        'Fellow of American Academy of Neurology'
-      ],
-      languages: ['English', 'Mandarin', 'French'],
-      insuranceAccepted: ['BlueCross BlueShield', 'Aetna', 'UnitedHealthcare', 'Medicare', 'Medicaid', 'Cigna', 'Humana'],
-      availability: {
-        monday: ['8:00 AM', '9:00 AM', '1:00 PM', '3:00 PM'],
-        tuesday: ['9:00 AM', '10:00 AM', '2:00 PM', '4:00 PM'],
-        wednesday: ['8:00 AM', '11:00 AM', '1:00 PM'],
-        thursday: ['9:00 AM', '2:00 PM', '3:00 PM'],
-        friday: ['8:00 AM', '10:00 AM', '1:00 PM']
-      },
-      services: [
-        'Stroke Treatment',
-        'Neurological Emergency Care',
-        'Brain Imaging Interpretation',
-        'Seizure Disorders',
-        'Headache Management',
-        'Cognitive Assessment',
-        'Neuro-rehabilitation',
-        'Preventive Neurology'
-      ],
-      consultationFee: 200,
-      followUpFee: 130,
-      videoConsultationFee: 160,
-      voiceConsultationFee: 140
-    },
-    'p6': {
-      id: 'p6',
-      name: 'Dr. Robert Martinez',
-      specialty: 'Gastroenterology',
-      subSpecialty: 'Hepatology',
-      facility: 'Digestive Health Center',
-      address: '987 Gastroenterology Way, Digestive District',
-      phone: '+1 (555) 678-9012',
-      email: 'robert.martinez@healthcare.com',
-      experience: 11,
-      rating: 4.6,
-      reviews: 198,
-      patientsServed: '2900+',
-      successRate: 93,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      coverImage: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=1200&q=80',
-      about: 'Dr. Robert Martinez is a board-certified gastroenterologist with expertise in hepatology and liver diseases. He has been treating complex digestive disorders for over 11 years, with a special focus on liver health and transplantation support. Dr. Martinez is known for his thorough diagnostic approach and personalized treatment plans.',
-      philosophy: 'Digestive health is fundamental to overall wellness. I believe in thorough evaluation, patient education, and collaborative care to achieve the best outcomes for my patients.',
-      achievements: [
-        'Gastroenterology Innovation Award 2023',
-        'Liver Disease Research Excellence',
-        'Patient Care Quality Recognition',
-        'Endoscopy Excellence Certification'
-      ],
-      publications: [
-        'Advances in Hepatology Treatment - Gastroenterology Journal 2023',
-        'Liver Disease Management Strategies - Digestive Health Review 2022',
-        'Endoscopic Innovation in GI Care - Medical Innovation Journal 2022'
-      ],
-      education: [
-        { degree: 'MD, Internal Medicine', institution: 'UCSF School of Medicine', year: '2012', honors: 'Alpha Omega Alpha' },
-        { degree: 'Fellowship, Gastroenterology', institution: 'Cleveland Clinic', year: '2015', honors: 'Chief Fellow' },
-        { degree: 'BS, Biology', institution: 'Stanford University', year: '2008', honors: 'Magna Cum Laude' }
-      ],
-      certifications: [
-        'Board Certified in Gastroenterology',
-        'Hepatology Subspecialty',
-        'American Board of Internal Medicine',
-        'Advanced Endoscopy Certification',
-        'American College of Gastroenterology'
-      ],
-      languages: ['English', 'Spanish', 'Italian'],
-      insuranceAccepted: ['BlueCross BlueShield', 'Aetna', 'UnitedHealthcare', 'Medicare', 'Cigna', 'Humana', 'Kaiser Permanente'],
-      availability: {
-        monday: ['9:00 AM', '10:00 AM', '1:00 PM', '2:00 PM'],
-        tuesday: ['9:00 AM', '11:00 AM', '3:00 PM'],
-        wednesday: ['8:00 AM', '10:00 AM', '1:00 PM'],
-        thursday: ['9:00 AM', '2:00 PM', '4:00 PM'],
-        friday: ['8:00 AM', '10:00 AM', '1:00 PM']
-      },
-      services: [
-        'Endoscopy Procedures',
-        'Liver Disease Treatment',
-        'Colonoscopy Screening',
-        'IBD Management',
-        'Acid Reflux Treatment',
-        'Liver Biopsy',
-        'Hepatitis Management',
-        'Digestive Health Optimization'
-      ],
-      consultationFee: 160,
-      followUpFee: 110,
-      videoConsultationFee: 130,
-      voiceConsultationFee: 110
-    }
-  };
+  // Load live doctor and doctors list from MongoDB backend
+  const [allDoctors, setAllDoctors] = useState([]);
 
-  // Get all doctor IDs for navigation
-  const doctorIds = Object.keys(doctorsDatabase);
+  useEffect(() => {
+    const fetchAllDoctors = async () => {
+      try {
+        const res = await api.get('/api/doctors');
+        if (Array.isArray(res.data)) {
+          setAllDoctors(res.data);
+        }
+      } catch (err) {
+        console.warn('Could not fetch doctor list:', err);
+      }
+    };
+    fetchAllDoctors();
+  }, []);
+
+  const doctorIds = allDoctors.map(d => d.id);
   const currentIndex = doctorIds.indexOf(doctorId);
   const prevDoctorId = currentIndex > 0 ? doctorIds[currentIndex - 1] : null;
-  const nextDoctorId = currentIndex < doctorIds.length - 1 ? doctorIds[currentIndex + 1] : null;
+  const nextDoctorId = currentIndex >= 0 && currentIndex < doctorIds.length - 1 ? doctorIds[currentIndex + 1] : null;
 
   useEffect(() => {
     const loadDoctorData = async () => {
       setLoading(true);
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const doctorData = doctorsDatabase[doctorId];
-      if (doctorData) {
-        setDoctor(doctorData);
-      } else {
+      try {
+        const res = await api.get(`/api/doctors/${doctorId}`);
+        if (res.data) {
+          setDoctor(res.data);
+        } else {
+          setDoctor(null);
+        }
+      } catch (err) {
+        console.error('Failed to load doctor from MongoDB:', err);
         setDoctor(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     if (doctorId) {
@@ -545,7 +176,6 @@ export default function DoctorProfile() {
               <ArrowLeft className="w-5 h-5" />
               Back to Doctors
             </button>
-            <p className="text-sm text-gray-500">Available doctors: {Object.keys(doctorsDatabase).join(', ')}</p>
           </div>
         </div>
       </div>

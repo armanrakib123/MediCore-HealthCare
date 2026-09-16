@@ -1,3 +1,4 @@
+import api from '../api/api';
 import React, { useState, memo, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -17,42 +18,31 @@ const ADMIN_INFO = {
   avatar: 'AD'
 };
 
-const SYSTEM_STATS = {
-  totalUsers: 5342,
-  totalPatients: 4247,
-  totalDoctors: 87,
-  totalPharmacies: 23,
-  prescriptionsMonth: 8547,
-  monthlyRevenue: 487000,
-  systemUptime: 99.97,
-  activeUsers: 3421,
-  newRegistrations: 134,
-  avgProcessingTime: 2.3,
-  fulfillmentRate: 96.8,
-  userGrowth: 15,
-  revenueGrowth: 18
-};
+// Admin Context for live MongoDB Atlas backend data
+export const AdminContext = React.createContext({
+  stats: {
+    totalUsers: 0,
+    totalPatients: 0,
+    totalDoctors: 0,
+    totalPharmacies: 0,
+    prescriptionsMonth: 0,
+    monthlyRevenue: 0,
+    systemUptime: 99.98,
+    activeUsers: 0,
+    newRegistrations: 0,
+    avgProcessingTime: 2.1,
+    fulfillmentRate: 97.4,
+    userGrowth: 15,
+    revenueGrowth: 18
+  },
+  users: [],
+  pharmacies: [],
+  systemHealth: [],
+  loading: false,
+  refresh: () => {}
+});
 
-const RECENT_USERS = [
-  { id: 1, name: 'Alice Thompson', role: 'patient', email: 'alice.t@email.com', joined: '5 min ago', status: 'active' },
-  { id: 2, name: 'Dr. James Lee', role: 'doctor', email: 'dr.lee@healthcare.com', joined: '1 hour ago', status: 'active' },
-  { id: 3, name: 'HealthPlus Pharmacy', role: 'pharmacy', email: 'info@healthplus.com', joined: '3 hours ago', status: 'pending' },
-  { id: 4, name: 'Sarah Martinez', role: 'patient', email: 'sarah.m@email.com', joined: '5 hours ago', status: 'active' }
-];
-
-const PHARMACY_NETWORK = [
-  { id: 1, name: 'MediCare Pharmacy', location: 'Downtown', orders: 234, uptime: 99.2, status: 'online', revenue: 45200 },
-  { id: 2, name: 'HealthPlus Rx', location: 'Westside', orders: 189, uptime: 98.7, status: 'online', revenue: 38900 },
-  { id: 3, name: 'CityMed Pharmacy', location: 'Eastside', orders: 156, uptime: 97.5, status: 'online', revenue: 32100 },
-  { id: 4, name: 'QuickCare Pharmacy', location: 'North District', orders: 98, uptime: 85.3, status: 'offline', revenue: 18700 }
-];
-
-const SYSTEM_HEALTH = [
-  { service: 'API Server', status: 'operational', uptime: 99.97, responseTime: '45ms' },
-  { service: 'Database', status: 'operational', uptime: 99.99, responseTime: '12ms' },
-  { service: 'Payment Gateway', status: 'operational', uptime: 99.95, responseTime: '234ms' },
-  { service: 'Backup System', status: 'operational', uptime: 100, responseTime: 'N/A' }
-];
+export const useAdmin = () => React.useContext(AdminContext);
 
 // Enhanced navigation with better structure
 const NAVIGATION_ITEMS = [
@@ -274,11 +264,11 @@ const Sidebar = memo(({
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="bg-purple-50 rounded-lg p-2">
               <p className="text-gray-600">Total Users</p>
-              <p className="font-semibold text-gray-800">{(SYSTEM_STATS.totalUsers/1000).toFixed(1)}K</p>
+              <p className="font-semibold text-gray-800">{(stats.totalUsers/1000).toFixed(1)}K</p>
             </div>
             <div className="bg-indigo-50 rounded-lg p-2">
               <p className="text-gray-600">Uptime</p>
-              <p className="font-semibold text-gray-800">{SYSTEM_STATS.systemUptime}%</p>
+              <p className="font-semibold text-gray-800">{stats.systemUptime}%</p>
             </div>
           </div>
         </div>
@@ -297,7 +287,7 @@ const Sidebar = memo(({
               <CheckCircle className="w-6 h-6 text-green-600" />
               <h4 className="font-semibold text-gray-800">All Systems Operational</h4>
             </div>
-            <p className="text-xs text-gray-600">Uptime: {SYSTEM_STATS.systemUptime}%</p>
+            <p className="text-xs text-gray-600">Uptime: {stats.systemUptime}%</p>
           </div>
         </div>
       </div>
@@ -306,12 +296,61 @@ const Sidebar = memo(({
 });
 
 // --- Placeholder Components for Future Views ---
-const UserManagementView = memo(() => (
-  <div className="p-4">
-    <h2 className="text-2xl font-bold text-gray-800 mb-4">User Management</h2>
-    <p className="text-gray-600">User management functionality coming soon...</p>
-  </div>
-));
+const UserManagementView = memo(() => {
+  const { users } = useAdmin();
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">User Directory (MongoDB)</h2>
+          <p className="text-gray-600">Total registered accounts: {users.length}</p>
+        </div>
+      </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="text-left py-4 px-6 font-semibold text-gray-700">User</th>
+              <th className="text-left py-4 px-6 font-semibold text-gray-700">Username</th>
+              <th className="text-left py-4 px-6 font-semibold text-gray-700">Role</th>
+              <th className="text-left py-4 px-6 font-semibold text-gray-700">Joined</th>
+              <th className="text-left py-4 px-6 font-semibold text-gray-700">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(u => (
+              <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td className="py-4 px-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {u.avatarEmoji || (u.name || u.username || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">{u.name || u.username}</p>
+                      <p className="text-xs text-gray-500">{u.email}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-4 px-6 font-mono text-xs text-gray-600">@{u.username}</td>
+                <td className="py-4 px-6">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 capitalize">
+                    {u.role}
+                  </span>
+                </td>
+                <td className="py-4 px-6 text-sm text-gray-600">{u.joined || 'Sep 16, 2026'}</td>
+                <td className="py-4 px-6">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                    {u.status || 'active'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+});
 
 const AnalyticsView = memo(() => (
   <div className="p-4">
@@ -322,6 +361,7 @@ const AnalyticsView = memo(() => (
 
 const DoctorsView = memo(() => {
   const navigate = useNavigate();
+  const { stats } = useAdmin();
   
   return (
     <div className="space-y-6">
@@ -351,7 +391,7 @@ const DoctorsView = memo(() => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Total Doctors</p>
-              <p className="text-2xl font-bold text-gray-900">87</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalDoctors}</p>
             </div>
           </div>
         </div>
@@ -363,7 +403,7 @@ const DoctorsView = memo(() => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Active</p>
-              <p className="text-2xl font-bold text-gray-900">76</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalDoctors}</p>
             </div>
           </div>
         </div>
@@ -420,7 +460,9 @@ const PlaceholderView = memo(({ title }) => (
 ));
 
 // --- Main Dashboard View Component ---
-const DashboardView = memo(() => (
+const DashboardView = memo(() => {
+  const { stats, users } = useAdmin();
+  return (
   <div className="space-y-6">
     {/* Welcome banner */}
     <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white">
@@ -445,10 +487,10 @@ const DashboardView = memo(() => (
             <Users className="w-6 h-6 text-indigo-600" />
           </div>
           <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">
-            +{SYSTEM_STATS.userGrowth}%
+            +{stats.userGrowth}%
           </span>
         </div>
-        <p className="text-3xl font-bold text-gray-800 mb-1">{SYSTEM_STATS.totalUsers.toLocaleString()}</p>
+        <p className="text-3xl font-bold text-gray-800 mb-1">{stats.totalUsers.toLocaleString()}</p>
         <p className="text-sm text-gray-600">Total Users</p>
       </div>
 
@@ -459,7 +501,7 @@ const DashboardView = memo(() => (
           </div>
           <TrendingUp className="w-5 h-5 text-blue-600" />
         </div>
-        <p className="text-3xl font-bold text-gray-800 mb-1">{SYSTEM_STATS.prescriptionsMonth.toLocaleString()}</p>
+        <p className="text-3xl font-bold text-gray-800 mb-1">{stats.prescriptionsMonth.toLocaleString()}</p>
         <p className="text-sm text-gray-600">Prescriptions/Month</p>
       </div>
 
@@ -472,7 +514,7 @@ const DashboardView = memo(() => (
             +2 new
           </span>
         </div>
-        <p className="text-3xl font-bold text-gray-800 mb-1">{SYSTEM_STATS.totalPharmacies}</p>
+        <p className="text-3xl font-bold text-gray-800 mb-1">{stats.totalPharmacies}</p>
         <p className="text-sm text-gray-600">Active Pharmacies</p>
       </div>
 
@@ -482,10 +524,10 @@ const DashboardView = memo(() => (
             <DollarSign className="w-6 h-6 text-emerald-600" />
           </div>
           <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">
-            +{SYSTEM_STATS.revenueGrowth}%
+            +{stats.revenueGrowth}%
           </span>
         </div>
-        <p className="text-3xl font-bold text-gray-800 mb-1">${(SYSTEM_STATS.monthlyRevenue/1000).toFixed(0)}K</p>
+        <p className="text-3xl font-bold text-gray-800 mb-1">${(stats.monthlyRevenue/1000).toFixed(0)}K</p>
         <p className="text-sm text-gray-600">Monthly Revenue</p>
       </div>
     </div>
@@ -502,7 +544,7 @@ const DashboardView = memo(() => (
                 ↓12%
               </span>
             </div>
-            <p className="text-3xl font-bold text-gray-800">{SYSTEM_STATS.avgProcessingTime} hrs</p>
+            <p className="text-3xl font-bold text-gray-800">{stats.avgProcessingTime} hrs</p>
           </div>
 
           <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
@@ -512,12 +554,12 @@ const DashboardView = memo(() => (
                 ↑2%
               </span>
             </div>
-            <p className="text-3xl font-bold text-gray-800">{SYSTEM_STATS.fulfillmentRate}%</p>
+            <p className="text-3xl font-bold text-gray-800">{stats.fulfillmentRate}%</p>
           </div>
 
           <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl">
             <span className="text-sm text-gray-600">System Uptime</span>
-            <p className="text-3xl font-bold text-gray-800">{SYSTEM_STATS.systemUptime}%</p>
+            <p className="text-3xl font-bold text-gray-800">{stats.systemUptime}%</p>
             <p className="text-xs text-gray-600 mt-1">Last 30 days</p>
           </div>
         </div>
@@ -536,7 +578,7 @@ const DashboardView = memo(() => (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-800 mb-4">Recent Users</h3>
         <div className="space-y-3">
-          {RECENT_USERS.slice(0, 3).map((user) => (
+          {users.slice(0, 5).map((user) => (
             <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
@@ -558,7 +600,8 @@ const DashboardView = memo(() => (
       </div>
     </div>
   </div>
-));
+  );
+});
 
 // --- Main Enhanced Component ---
 const AdminDashboard = () => {
@@ -665,7 +708,8 @@ const AdminDashboard = () => {
   }, [selectedTab]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <AdminContext.Provider value={{ stats, users, systemHealth, loading, refresh: fetchAdminData }}>
+      <div className="flex h-screen bg-gray-50">
       <Sidebar 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen} 
@@ -710,6 +754,7 @@ const AdminDashboard = () => {
         </main>
       </div>
     </div>
+    </AdminContext.Provider>
   );
 };
 

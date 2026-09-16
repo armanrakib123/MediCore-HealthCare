@@ -83,7 +83,40 @@ public class AuthController : ControllerBase
         await _userService.UpdateAsync(user.Id!, user);
 
         var token = _jwtService.GenerateToken(user.Username, user.Role, user.Id);
-        return Ok(new AuthResponse(token, user.Username, user.Role, user.AvatarColor, user.AvatarEmoji, user.ProfileImageUrl));
+        var response = new AuthResponse(token, user.Username, user.Role, user.AvatarColor, user.AvatarEmoji, user.ProfileImageUrl);
+
+        if (user.Role == "Doctor")
+        {
+            var doc = await _doctorService.GetDoctorByUserIdAsync(user.Id);
+            if (doc != null)
+            {
+                response.DoctorId = doc.Id;
+                response.LicenseNumber = doc.LicenseNumber;
+                response.Specialization = doc.Specialization;
+            }
+        }
+        else if (user.Role == "Patient")
+        {
+            var pat = await _patientService.GetPatientByUserIdAsync(user.Id);
+            if (pat != null)
+            {
+                response.PatientId = pat.Id;
+                response.MedicalRecordNumber = pat.MedicalRecordNumber;
+                response.BloodType = pat.BloodType;
+            }
+        }
+        else if (user.Role == "Pharmacist")
+        {
+            var ph = await _pharmacyService.GetPharmacyByUserIdAsync(user.Id);
+            if (ph != null)
+            {
+                response.PharmacyId = ph.Id;
+                response.PharmacyName = ph.PharmacyName;
+                response.PharmacyLicenseNumber = ph.LicenseNumber;
+            }
+        }
+
+        return Ok(response);
     }
 
     [HttpPost("login-google")]

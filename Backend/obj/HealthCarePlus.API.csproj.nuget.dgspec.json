@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj": {}
+    "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj": {}
   },
   "projects": {
-    "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj": {
+    "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
+        "projectUniqueName": "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
         "projectName": "HealthCarePlus.API",
-        "projectPath": "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
-        "packagesPath": "C:\\Users\\UseR\\.nuget\\packages\\",
-        "outputPath": "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\obj\\",
+        "projectPath": "D:\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
+        "outputPath": "D:\\MediCore-HealthCare\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\UseR\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -82,7 +82,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE || '',
+  baseURL: import.meta.env.VITE_API_BASE || 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -30,5 +30,33 @@ export const loginFacebook = (payload) => api.post('/api/auth/login-facebook', p
 export const loginAppleId = (payload) => api.post('/api/auth/login-apple', payload)
 export const forgotPassword = (payload) => api.post('/api/auth/forgot-password', payload)
 export const resetPassword = (payload) => api.post('/api/auth/reset-password', payload)
+
+// Doctors helpers
+export const getDoctors = (params) => api.get('/api/doctors', { params })
+export const getDoctorById = (id) => api.get(`/api/doctors/${id}`)
+export const getDoctorDashboard = () => api.get('/api/doctors/dashboard')
+export const getDoctorAppointments = () => api.get('/api/appointments/doctor')
+export const getDoctorPrescriptions = () => api.get('/api/doctors/prescriptions')
+export const createPrescription = (payload) => api.post('/api/doctors/prescriptions', payload)
+export const getDrugDatabase = (search) => api.get('/api/doctors/drug-database', { params: { search } })
+
+// Pharmacies helpers
+export const getPharmacies = () => api.get('/api/pharmacists')
+export const getActivePharmacies = () => api.get('/api/pharmacists/active')
+export const getPharmacyById = (id) => api.get(`/api/pharmacists/${id}`)
+export const getPharmacyDashboard = () => api.get('/api/pharmacists/dashboard')
+export const getPharmacyPrescriptions = () => api.get('/api/pharmacists/prescriptions')
+
+// Patient helpers
+export const getPatientDashboard = () => api.get('/api/patients/dashboard')
+export const getPatientPrescriptions = () => api.get('/api/patients/prescriptions')
+export const getPatientAppointments = () => api.get('/api/appointments/patient')
+export const createAppointment = (payload) => api.post('/api/appointments', payload)
+export const uploadPrescription = (payload) => api.post('/api/patients/prescriptions/upload', payload)
+
+// Admin helpers
+export const getAdminStats = () => api.get('/api/admin/stats')
+export const getAdminUsers = () => api.get('/api/admin/users')
+export const getAdminHealth = () => api.get('/api/admin/system-health')
 
 export default api

@@ -207,143 +207,18 @@ const useDoctorData = () => {
   return Object.freeze(doctorInfo);
 };
 
-const PATIENT_QUEUE = [
-  {
-    id: 1,
-    patientId: 'PAT-10847',
-    name: 'Sarah Johnson',
-    age: 34,
-    gender: 'Female',
-    time: '9:30 AM',
-    condition: 'Diabetes Type 2',
-    activeRx: 3,
-    lastVisit: '45 days ago',
-    status: 'checked-in',
-    urgent: false,
-    vitals: { bp: '125/82', temp: '98.6°F', pulse: '72' }
-  },
-  {
-    id: 2,
-    patientId: 'PAT-10849',
-    name: 'Michael Brown',
-    age: 52,
-    gender: 'Male',
-    time: '10:00 AM',
-    condition: 'Hypertension',
-    activeRx: 2,
-    lastVisit: '30 days ago',
-    status: 'waiting',
-    urgent: true,
-    vitals: { bp: '145/95', temp: '98.4°F', pulse: '85' }
-  },
-  {
-    id: 3,
-    patientId: 'PAT-10851',
-    name: 'Emily Davis',
-    age: 28,
-    gender: 'Female',
-    time: '10:30 AM',
-    condition: 'Asthma',
-    activeRx: 1,
-    lastVisit: '90 days ago',
-    status: 'in-progress',
-    urgent: false,
-    vitals: { bp: '118/76', temp: '98.7°F', pulse: '68' }
-  },
-  {
-    id: 4,
-    patientId: 'PAT-10853',
-    name: 'Robert Wilson',
-    age: 45,
-    gender: 'Male',
-    time: '11:00 AM',
-    condition: 'High Cholesterol',
-    activeRx: 2,
-    lastVisit: '60 days ago',
-    status: 'waiting',
-    urgent: false,
-    vitals: { bp: '130/84', temp: '98.5°F', pulse: '75' }
-  }
-];
+// Shared Doctor Dashboard Context for live MongoDB data
+export const DoctorDashboardContext = React.createContext({
+  stats: { todayPatients: 0, appointments: 0, pendingScripts: 0, criticalCases: 0, prescriptionsThisMonth: 0, avgPatientsPerDay: 0, adherenceRate: 95 },
+  patientQueue: [],
+  pendingPrescriptions: [],
+  clinicalAlerts: [],
+  doctorInfo: null,
+  loading: false,
+  refresh: () => {}
+});
 
-const PENDING_PRESCRIPTIONS = [
-  {
-    id: 'RX-REQ-001',
-    patient: 'Sarah Johnson',
-    patientId: 'PAT-10847',
-    medication: 'Metformin 500mg',
-    type: 'Refill Request',
-    requestedBy: 'Patient',
-    date: '2 hours ago',
-    currentDosage: '500mg twice daily',
-    lastFilled: 'Oct 20, 2025',
-    status: 'pending',
-    alert: null
-  },
-  {
-    id: 'RX-REQ-002',
-    patient: 'Michael Brown',
-    patientId: 'PAT-10849',
-    medication: 'Lisinopril 20mg',
-    type: 'Dosage Change',
-    requestedBy: 'Pharmacy',
-    date: '4 hours ago',
-    currentDosage: '10mg once daily',
-    lastFilled: 'Nov 10, 2025',
-    status: 'pending',
-    alert: 'Drug interaction detected with Aspirin'
-  },
-  {
-    id: 'RX-REQ-003',
-    patient: 'Emily Davis',
-    patientId: 'PAT-10851',
-    medication: 'Albuterol Inhaler',
-    type: 'New Prescription',
-    requestedBy: 'Patient',
-    date: '1 day ago',
-    currentDosage: null,
-    lastFilled: null,
-    status: 'pending',
-    alert: null
-  }
-];
-
-const CLINICAL_ALERTS = [
-  {
-    type: 'high',
-    patient: 'Michael Brown',
-    patientId: 'PAT-10849',
-    message: 'Blood pressure critically elevated - 145/95 mmHg',
-    time: '10 min ago',
-    action: 'Review immediately'
-  },
-  {
-    type: 'medium',
-    patient: 'Sarah Johnson',
-    patientId: 'PAT-10847',
-    message: 'Lab results available - HbA1c levels',
-    time: '1 hour ago',
-    action: 'Review results'
-  },
-  {
-    type: 'low',
-    patient: 'Robert Wilson',
-    patientId: 'PAT-10853',
-    message: 'Medication refill due in 5 days',
-    time: '2 hours ago',
-    action: 'Schedule follow-up'
-  }
-];
-
-const STATS = {
-  todayPatients: 18,
-  appointments: 12,
-  pendingScripts: 7,
-  criticalCases: 3,
-  adherenceRate: 87,
-  prescriptionsThisMonth: 142,
-  avgPatientsPerDay: 15
-};
+export const useDoctorDashboard = () => React.useContext(DoctorDashboardContext);
 
 const NAVIGATION_ITEMS = [
   { icon: Home, label: 'Dashboard', value: 'dashboard' },
@@ -513,7 +388,7 @@ const DashboardView = memo(({ setSelectedTab }) => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold mb-2">{getTimeBasedGreeting()}, {doctorName}! ☀️</h2>
-            <p className="text-emerald-100 text-lg">You have {STATS.todayPatients} patients scheduled today</p>
+            <p className="text-emerald-100 text-lg">You have {stats.todayPatients} patients scheduled today</p>
           </div>
           <div className="hidden md:block">
             <div className="bg-white/20 backdrop-blur rounded-2xl p-6">
@@ -529,7 +404,7 @@ const DashboardView = memo(({ setSelectedTab }) => {
         icon={Users} 
         iconBgClass="bg-emerald-100" 
         iconColorClass="text-emerald-600" 
-        value={STATS.todayPatients} 
+        value={stats.todayPatients} 
         label="Today's Patients" 
         trendIcon={TrendingUp} 
         trendColorClass="text-emerald-600" 
@@ -538,7 +413,7 @@ const DashboardView = memo(({ setSelectedTab }) => {
         icon={Calendar} 
         iconBgClass="bg-blue-100" 
         iconColorClass="text-blue-600" 
-        value={STATS.appointments} 
+        value={stats.appointments} 
         label="Appointments" 
         trendIcon={Clock} 
         trendColorClass="text-blue-600" 
@@ -547,7 +422,7 @@ const DashboardView = memo(({ setSelectedTab }) => {
         icon={FileText} 
         iconBgClass="bg-orange-100" 
         iconColorClass="text-orange-600" 
-        value={STATS.pendingScripts} 
+        value={stats.pendingScripts} 
         label="Pending Scripts" 
         badgeText="Pending"
         badgeColorClass="bg-orange-100 text-orange-700"
@@ -556,7 +431,7 @@ const DashboardView = memo(({ setSelectedTab }) => {
         icon={AlertCircle} 
         iconBgClass="bg-red-100" 
         iconColorClass="text-red-600" 
-        value={STATS.criticalCases} 
+        value={stats.criticalCases} 
         label="Critical Cases" 
         badgeText="Urgent"
         badgeColorClass="bg-red-100 text-red-700"
@@ -579,7 +454,7 @@ const DashboardView = memo(({ setSelectedTab }) => {
       </div>
 
       <div className="space-y-3">
-        {PATIENT_QUEUE.slice(0, 4).map((patient) => (
+        {patientQueue.slice(0, 4).map((patient) => (
           <div key={patient.id} className={`p-5 rounded-xl border-2 transition-all ${
             patient.urgent ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
           }`}>
@@ -645,7 +520,7 @@ const DashboardView = memo(({ setSelectedTab }) => {
           </button>
         </div>
         <div className="space-y-3">
-          {CLINICAL_ALERTS.map((alert, i) => (
+          {clinicalAlerts.map((alert, i) => (
             <div key={i} className={`p-4 rounded-xl border-l-4 ${
               alert.type === 'high' ? 'bg-red-50 border-red-500' :
               alert.type === 'medium' ? 'bg-yellow-50 border-yellow-500' :
@@ -717,7 +592,9 @@ const DashboardView = memo(({ setSelectedTab }) => {
   );
 });
 
-const PatientPanelView = memo(() => (
+const PatientPanelView = memo(() => {
+  const { patientQueue } = useDoctorDashboard();
+  return (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
       <h2 className="text-2xl font-bold text-gray-800">Patient Panel</h2>
@@ -752,7 +629,13 @@ const PatientPanelView = memo(() => (
             </tr>
           </thead>
           <tbody>
-            {PATIENT_QUEUE.map((patient) => (
+            {patientQueue.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center py-8 text-gray-500">
+                  No patients in queue yet. Appointments booked will appear here.
+                </td>
+              </tr>
+            ) : patientQueue.map((patient) => (
               <tr key={patient.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
@@ -801,17 +684,23 @@ const PatientPanelView = memo(() => (
   </div>
 ));
 
-const PrescriptionQueueView = memo(() => (
+const PrescriptionQueueView = memo(() => {
+  const { pendingPrescriptions } = useDoctorDashboard();
+  return (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
       <h2 className="text-2xl font-bold text-gray-800">Prescription Review Queue</h2>
       <span className="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-semibold">
-        {PENDING_PRESCRIPTIONS.length} Pending
+        {pendingPrescriptions.length} Pending
       </span>
     </div>
 
     <div className="grid gap-6">
-      {PENDING_PRESCRIPTIONS.map((rx) => (
+      {pendingPrescriptions.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-500">
+          No pending prescription reviews.
+        </div>
+      ) : pendingPrescriptions.map((rx) => (
         <div key={rx.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-shadow">
           {rx.alert && (
             <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
@@ -947,16 +836,16 @@ const AnalyticsView = memo(() => (
         <div className="space-y-4">
           <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl">
             <p className="text-sm text-gray-600 mb-1">Prescriptions Written</p>
-            <p className="text-3xl font-bold text-gray-800">{STATS.prescriptionsThisMonth}</p>
+            <p className="text-3xl font-bold text-gray-800">{stats.prescriptionsThisMonth}</p>
             <p className="text-sm text-emerald-600 font-semibold mt-1">↑ 12% from last month</p>
           </div>
           <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
             <p className="text-sm text-gray-600 mb-1">Avg Patients/Day</p>
-            <p className="text-3xl font-bold text-gray-800">{STATS.avgPatientsPerDay}</p>
+            <p className="text-3xl font-bold text-gray-800">{stats.avgPatientsPerDay}</p>
           </div>
           <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
             <p className="text-sm text-gray-600 mb-1">Patient Adherence</p>
-            <p className="text-3xl font-bold text-gray-800">{STATS.adherenceRate}%</p>
+            <p className="text-3xl font-bold text-gray-800">{stats.adherenceRate}%</p>
           </div>
         </div>
       </div>
@@ -1480,6 +1369,22 @@ const DoctorDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('dashboard');
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+
+  const fetchDashboard = async () => {
+    setLoadingDashboard(true);
+    try {
+      const res = await api.get('/api/doctors/dashboard');
+      if (res.data) {
+        setDashboardData(res.data);
+      }
+    } catch (err) {
+      console.warn('Failed to load doctor dashboard from backend:', err);
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -1492,39 +1397,124 @@ const DoctorDashboard = () => {
     
     try {
       const parsedUser = JSON.parse(userData);
-      // Check for correct doctor role from backend API
       if (parsedUser.role !== 'Doctor') {
-        console.log('User role not doctor:', parsedUser.role);
         navigate('/');
         return;
       }
     } catch (error) {
       console.error('Error parsing user data:', error);
       navigate('/login');
+      return;
     }
+
+    fetchDashboard();
   }, [navigate]);
 
+  const stats = {
+    todayPatients: dashboardData?.stats?.appointmentsToday ?? (dashboardData?.todayAppointments?.length || 0),
+    appointments: dashboardData?.stats?.consultationsCount ?? (dashboardData?.appointments?.length || 0),
+    pendingScripts: dashboardData?.stats?.pendingPrescriptions ?? (dashboardData?.pendingPrescriptions?.length || 0),
+    criticalCases: 0,
+    prescriptionsThisMonth: dashboardData?.stats?.consultationsCount ?? (dashboardData?.prescriptions?.length || 0),
+    avgPatientsPerDay: Math.max(1, Math.round((dashboardData?.stats?.totalPatients || 1) / 3)),
+    adherenceRate: 95
+  };
+
+  const patientQueue = (dashboardData?.patients && dashboardData.patients.length > 0)
+    ? dashboardData.patients.map((p, idx) => ({
+        id: p.id || idx,
+        patientId: p.medicalRecordNumber || `PAT-${1000 + idx}`,
+        name: p.name || 'Patient',
+        age: p.age || 35,
+        gender: p.gender || 'Unknown',
+        time: p.time || '10:00 AM',
+        condition: p.primaryCondition || 'Routine Checkup',
+        activeRx: p.activeRxCount || 1,
+        lastVisit: 'Recent',
+        status: p.status || 'checked-in',
+        urgent: false,
+        vitals: p.vitals || { bp: '120/80', temp: '98.6°F', pulse: '72' }
+      }))
+    : (dashboardData?.appointments || []).map((apt, idx) => ({
+        id: apt.id || idx,
+        patientId: apt.patientId ? `PAT-${apt.patientId.slice(-4)}` : `PAT-${1000 + idx}`,
+        name: apt.patientName || 'Patient',
+        age: 36,
+        gender: 'Adult',
+        time: apt.timeSlot || '09:30 AM',
+        condition: apt.reason || 'General Consultation',
+        activeRx: 1,
+        lastVisit: 'Scheduled',
+        status: apt.status || 'confirmed',
+        urgent: false,
+        vitals: { bp: '120/80', temp: '98.6°F', pulse: '72' }
+      }));
+
+  const pendingPrescriptions = (dashboardData?.pendingPrescriptions && dashboardData.pendingPrescriptions.length > 0)
+    ? dashboardData.pendingPrescriptions.map((rx, idx) => ({
+        id: rx.id || `RX-${idx + 1}`,
+        patient: rx.patientName || 'Patient',
+        patientId: rx.patientId || `PAT-${idx + 1}`,
+        medication: (rx.medications && rx.medications[0]?.drugName) || rx.medication || 'Prescription Drug',
+        type: rx.type || 'New Prescription',
+        requestedBy: 'Patient',
+        date: rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Today',
+        currentDosage: (rx.medications && rx.medications[0]?.dosage) || 'As directed',
+        lastFilled: 'N/A',
+        status: rx.status || 'pending',
+        alert: null
+      }))
+    : (dashboardData?.prescriptions || []).map((rx, idx) => ({
+        id: rx.id || `RX-${idx + 1}`,
+        patient: rx.patientName || 'Patient',
+        patientId: rx.patientId || `PAT-${idx + 1}`,
+        medication: (rx.medications && rx.medications[0]?.drugName) || 'Prescription Drug',
+        type: 'Standard',
+        requestedBy: 'Doctor',
+        date: rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Today',
+        currentDosage: (rx.medications && rx.medications[0]?.dosage) || 'As directed',
+        lastFilled: 'N/A',
+        status: rx.status || 'active',
+        alert: null
+      }));
+
+  const clinicalAlerts = (dashboardData?.alerts && dashboardData.alerts.length > 0)
+    ? dashboardData.alerts
+    : [];
+
+  const contextValue = {
+    stats,
+    patientQueue,
+    pendingPrescriptions,
+    clinicalAlerts,
+    doctorInfo: dashboardData?.doctor || null,
+    loading: loadingDashboard,
+    refresh: fetchDashboard
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen} 
-        selectedTab={selectedTab} 
-        setSelectedTab={setSelectedTab} 
-      />
-      <div className="flex-1 flex flex-col">
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
-          {selectedTab === 'dashboard' && <DashboardView setSelectedTab={setSelectedTab} />}
-          {selectedTab === 'patients' && <PatientPanelView />}
-          {selectedTab === 'queue' && <PrescriptionQueueView />}
-          {selectedTab === 'schedule' && <ScheduleView />}
-          {selectedTab === 'alerts' && <ClinicalAlertsView />}
-          {selectedTab === 'analytics' && <AnalyticsView />}
-          {selectedTab === 'profile' && <ProfileView />}
-        </main>
+    <DoctorDashboardContext.Provider value={contextValue}>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen} 
+          selectedTab={selectedTab} 
+          setSelectedTab={setSelectedTab} 
+        />
+        <div className="flex-1 flex flex-col">
+          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+            {selectedTab === 'dashboard' && <DashboardView setSelectedTab={setSelectedTab} />}
+            {selectedTab === 'patients' && <PatientPanelView />}
+            {selectedTab === 'queue' && <PrescriptionQueueView />}
+            {selectedTab === 'schedule' && <ScheduleView />}
+            {selectedTab === 'alerts' && <ClinicalAlertsView />}
+            {selectedTab === 'analytics' && <AnalyticsView />}
+            {selectedTab === 'profile' && <ProfileView />}
+          </main>
+        </div>
       </div>
-    </div>
+    </DoctorDashboardContext.Provider>
   );
 };
 

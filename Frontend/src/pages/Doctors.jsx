@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, Filter, MapPin, Phone, Mail, Star, Calendar, 
   MessageSquare, User, Award, Clock, ChevronRight, Stethoscope,
-  Heart, Video, Building2, GraduationCap, ArrowRight, ChevronDown, Sparkles
+  Heart, Video, Building2, GraduationCap, ArrowRight, ChevronDown, Sparkles, Loader2
 } from 'lucide-react';
+import api from '../api/api';
 
 export default function BeautifulDoctorsPage() {
   const navigate = useNavigate();
@@ -14,129 +15,43 @@ export default function BeautifulDoctorsPage() {
   const [sortBy, setSortBy] = useState('rating');
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [favorites, setFavorites] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data
-  const doctors = [
-    { 
-      id: "p1", 
-      name: "Dr. Sarah Johnson", 
-      specialty: "Cardiology", 
-      subSpecialty: "Interventional Cardiology",
-      facility: "MediCore Medical Center", 
-      phone: "+1 (555) 123-4567",
-      email: "sarah.johnson@healthcare.com",
-      experience: 15,
-      rating: 4.9,
-      reviews: 234,
-      nextAvailable: "Today, 2:00 PM",
-      consultationFee: "$150",
-      languages: ["English", "Spanish"],
-      avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      acceptsNewPatients: true
-    },
-    { 
-      id: "p2", 
-      name: "Dr. Michael Chen", 
-      specialty: "Pediatrics", 
-      subSpecialty: "Child Development",
-      facility: "Children's Hospital", 
-      phone: "+1 (555) 234-5678",
-      email: "michael.chen@healthcare.com",
-      experience: 12,
-      rating: 4.8,
-      reviews: 189,
-      nextAvailable: "Tomorrow, 10:00 AM",
-      consultationFee: "$120",
-      languages: ["English", "Mandarin"],
-      avatar: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      acceptsNewPatients: true
-    },
-    { 
-      id: "p3", 
-      name: "Dr. Emily Rodriguez", 
-      specialty: "Dermatology", 
-      subSpecialty: "Cosmetic Dermatology",
-      facility: "Skin Care Center", 
-      phone: "+1 (555) 345-6789",
-      email: "emily.rodriguez@healthcare.com",
-      experience: 8,
-      rating: 4.7,
-      reviews: 156,
-      nextAvailable: "Dec 10, 3:00 PM",
-      consultationFee: "$140",
-      languages: ["English", "Spanish"],
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      acceptsNewPatients: false
-    },
-    { 
-      id: "p4", 
-      name: "Dr. James Wilson", 
-      specialty: "Orthopedics", 
-      subSpecialty: "Sports Medicine",
-      facility: "MediCore Medical Center", 
-      phone: "+1 (555) 456-7890",
-      email: "james.wilson@healthcare.com",
-      experience: 20,
-      rating: 4.9,
-      reviews: 298,
-      nextAvailable: "Today, 4:30 PM",
-      consultationFee: "$180",
-      languages: ["English"],
-      avatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      acceptsNewPatients: true
-    },
-    { 
-      id: "p5", 
-      name: "Dr. Lisa Thompson", 
-      specialty: "Neurology", 
-      subSpecialty: "Headache & Migraine",
-      facility: "Brain & Spine Institute", 
-      phone: "+1 (555) 567-8901",
-      email: "lisa.thompson@healthcare.com",
-      experience: 14,
-      rating: 4.8,
-      reviews: 201,
-      nextAvailable: "Tomorrow, 11:00 AM",
-      consultationFee: "$160",
-      languages: ["English", "French"],
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      acceptsNewPatients: true
-    },
-    { 
-      id: "p6", 
-      name: "Dr. Robert Davis", 
-      specialty: "General Medicine", 
-      subSpecialty: "Family Practice",
-      facility: "Primary Care Clinic", 
-      phone: "+1 (555) 678-9012",
-      email: "robert.davis@healthcare.com",
-      experience: 18,
-      rating: 4.6,
-      reviews: 145,
-      nextAvailable: "Today, 5:00 PM",
-      consultationFee: "$100",
-      languages: ["English"],
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      acceptsNewPatients: true
-    }
-  ];
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/api/doctors');
+        if (Array.isArray(res.data)) {
+          setDoctors(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load doctors from backend:', err);
+        setError('Unable to load doctors from server.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctors();
+  }, []);
 
-  const facilities = Array.from(new Set(doctors.map(d => d.facility)));
-  const specialties = Array.from(new Set(doctors.map(d => d.specialty)));
+  const facilities = Array.from(new Set(doctors.map(d => d.facility).filter(Boolean)));
+  const specialties = Array.from(new Set(doctors.map(d => d.specialty).filter(Boolean)));
 
   const filteredDoctors = doctors.filter(doc => {
     const matchesQuery = query === '' || 
-      doc.name.toLowerCase().includes(query.toLowerCase()) ||
-      doc.specialty.toLowerCase().includes(query.toLowerCase());
+      (doc.name && doc.name.toLowerCase().includes(query.toLowerCase())) ||
+      (doc.specialty && doc.specialty.toLowerCase().includes(query.toLowerCase()));
     const matchesFacility = filterFacility === 'all' || doc.facility === filterFacility;
     const matchesSpecialty = filterSpecialty === 'all' || doc.specialty === filterSpecialty;
     return matchesQuery && matchesFacility && matchesSpecialty;
+  }).sort((a, b) => {
+    if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+    if (sortBy === 'experience') return (b.experience || 0) - (a.experience || 0);
+    if (sortBy === 'reviews') return (b.reviews || 0) - (a.reviews || 0);
+    return 0;
   });
 
   return (
@@ -250,6 +165,12 @@ export default function BeautifulDoctorsPage() {
 
       {/* Doctors Grid */}
       <div className="max-w-7xl mx-auto px-6 py-12">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24">
+            <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mb-4" />
+            <p className="text-gray-600 font-semibold text-lg">Loading doctors from MediCore database...</p>
+          </div>
+        ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredDoctors.map((doctor) => (
             <div
@@ -394,9 +315,10 @@ export default function BeautifulDoctorsPage() {
             </div>
           ))}
         </div>
+        )}
 
         {/* No Results */}
-        {filteredDoctors.length === 0 && (
+        {!loading && filteredDoctors.length === 0 && (
           <div className="text-center py-20">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Search className="w-12 h-12 text-gray-400" />
