@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ======================================================
 
 var clientUrl =
-    Environment.GetEnvironmentVariable("NEXT_PUBLIC_BASE_URL")
+    Environment.GetEnvironmentVariable("BaseUrl")
     ?? "http://localhost:5173";
 
 Console.WriteLine();
