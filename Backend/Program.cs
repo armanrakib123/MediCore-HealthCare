@@ -1,128 +1,62 @@
-// using HealthCarePlus.API.Services;
-// using HealthCarePlus.API.Repositories.Interfaces;
-// using HealthCarePlus.API.Repositories;
-// using Microsoft.AspNetCore.Authentication.JwtBearer;
-// using Microsoft.IdentityModel.Tokens;
-// using System.Text;
-// using BCrypt.Net;
-// using MongoDB.Driver;
-// using Microsoft.Extensions.Options;
-// using HealthCarePlus.API.Models;
-// using HealthCarePlus.API.DTOs;
-
-// var builder = WebApplication.CreateBuilder(args);
-
-// // Configuration
-// builder.Services.Configure<Microsoft.AspNetCore.Http.HttpContext>(opts => { });
-
-// // MongoDB Configuration
-// var mongoConnectionString = builder.Configuration["MongoDbSettings:ConnectionString"] ?? "mongodb://localhost:27017";
-// var databaseName = builder.Configuration["MongoDbSettings:DatabaseName"] ?? "healthcareplus";
-
-// builder.Services.AddSingleton<IMongoClient>(s => new MongoClient(mongoConnectionString));
-// builder.Services.AddScoped(s => s.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
-
-// // Repositories
-// builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
-// builder.Services.AddScoped<IPharmacyRepository, PharmacyRepository>();
-// builder.Services.AddScoped<IPatientRepository, PatientRepository>();
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
-// builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
-
-// // Services
-// builder.Services.AddScoped<UserService>();
-// builder.Services.AddScoped<DoctorService>();
-// builder.Services.AddScoped<PharmacyService>();
-// builder.Services.AddScoped<HealthCarePlus.API.Services.PatientService>();
-// builder.Services.AddScoped<JwtService>();
-// builder.Services.AddScoped<AvatarService>();
-
-// // JWT
-// var jwtKey = builder.Configuration["Jwt:Key"] ?? "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET";
-// var issuer = builder.Configuration["Jwt:Issuer"] ?? "HealthCarePlus";
-// builder.Services.AddAuthentication(options =>
-// {
-//     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-// }).AddJwtBearer(options =>
-// {
-//     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-//     {
-//         ValidateIssuer = true,
-//         ValidateAudience = true,
-//         ValidIssuer = issuer,
-//         ValidAudience = issuer,
-//         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-//         ValidateIssuerSigningKey = true
-//     };
-// });
-
-// builder.Services.AddAuthorization();
-// builder.Services.AddControllers();
-// builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
-
-// // CORS Configuration
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowAll", policy =>
-//     {
-//         policy.AllowAnyOrigin()
-//               .AllowAnyHeader()
-//               .AllowAnyMethod();
-//     });
-// });
-
-// var app = builder.Build();
-
-// // Configure the HTTP request pipeline
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
-
-// app.UseCors("AllowAll");
-// app.UseAuthentication();
-// app.UseAuthorization();
-
-// app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-// app.MapControllers();
-
-// app.Run();
-
-
-
-
-
-
-
-
-
-
-
-
 using HealthCarePlus.API.Services;
 using HealthCarePlus.API.Repositories.Interfaces;
 using HealthCarePlus.API.Repositories;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+
+using MongoDB.Bson;
 using MongoDB.Driver;
 
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// ======================================================
+// Frontend URL Configuration
+// ======================================================
+
+var clientUrl =
+    Environment.GetEnvironmentVariable("NEXT_PUBLIC_BASE_URL")
+    ?? "http://localhost:5173";
+
+Console.WriteLine();
+Console.WriteLine("======================================================");
+Console.WriteLine($"🌐 Frontend URL: {clientUrl}");
+Console.WriteLine("======================================================");
+
 
 // ======================================================
 // MongoDB Configuration
 // ======================================================
 
 var mongoConnectionString =
-    builder.Configuration["MongoDbSettings:ConnectionString"]
-    ?? "mongodb://localhost:27017";
+    builder.Configuration["MongoDbSettings:ConnectionString"];
 
 var databaseName =
-    builder.Configuration["MongoDbSettings:DatabaseName"]
-    ?? "healthcareplus";
+    builder.Configuration["MongoDbSettings:DatabaseName"];
+
+// Validate MongoDB configuration
+if (string.IsNullOrWhiteSpace(mongoConnectionString))
+{
+    throw new InvalidOperationException(
+        "MongoDB connection string is not configured. " +
+        "Set 'MongoDbSettings:ConnectionString' in User Secrets or configuration."
+    );
+}
+
+if (string.IsNullOrWhiteSpace(databaseName))
+{
+    throw new InvalidOperationException(
+        "MongoDB database name is not configured. " +
+        "Set 'MongoDbSettings:DatabaseName' in User Secrets or configuration."
+    );
+}
+
+
+// ======================================================
+// MongoDB Registration
+// ======================================================
 
 builder.Services.AddSingleton<IMongoClient>(
     new MongoClient(mongoConnectionString)
@@ -130,7 +64,9 @@ builder.Services.AddSingleton<IMongoClient>(
 
 builder.Services.AddScoped<IMongoDatabase>(serviceProvider =>
 {
-    var client = serviceProvider.GetRequiredService<IMongoClient>();
+    var client =
+        serviceProvider.GetRequiredService<IMongoClient>();
+
     return client.GetDatabase(databaseName);
 });
 
@@ -140,22 +76,40 @@ builder.Services.AddScoped<IMongoDatabase>(serviceProvider =>
 // ======================================================
 
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+
 builder.Services.AddScoped<IPharmacyRepository, PharmacyRepository>();
+
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 
 
 // ======================================================
-// Services
+// Application Services
 // ======================================================
 
 builder.Services.AddScoped<UserService>();
+
 builder.Services.AddScoped<DoctorService>();
+
 builder.Services.AddScoped<PharmacyService>();
-builder.Services.AddScoped<HealthCarePlus.API.Services.PatientService>();
+
+builder.Services.AddScoped<
+    HealthCarePlus.API.Services.PatientService
+>();
+
 builder.Services.AddScoped<JwtService>();
+
 builder.Services.AddScoped<AvatarService>();
+
+
+// ======================================================
+// Seed Data Service
+// ======================================================
+
+builder.Services.AddScoped<SeedDataService>();
 
 
 // ======================================================
@@ -163,24 +117,35 @@ builder.Services.AddScoped<AvatarService>();
 // ======================================================
 
 var jwtKey =
-    builder.Configuration["Jwt:Key"]
-    ?? "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET";
+    builder.Configuration["Jwt:Key"];
 
 var issuer =
     builder.Configuration["Jwt:Issuer"]
     ?? "HealthCarePlus";
 
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException(
+        "JWT secret key is not configured. " +
+        "Set 'Jwt:Key' in User Secrets or environment variables."
+    );
+}
+
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddAuthentication(
+        JwtBearerDefaults.AuthenticationScheme
+    )
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
                 ValidateIssuer = true,
+
                 ValidateAudience = true,
 
                 ValidIssuer = issuer,
+
                 ValidAudience = issuer,
 
                 ValidateIssuerSigningKey = true,
@@ -190,7 +155,9 @@ builder.Services
                         Encoding.UTF8.GetBytes(jwtKey)
                     ),
 
-                ValidateLifetime = true
+                ValidateLifetime = true,
+
+                ClockSkew = TimeSpan.Zero
             };
     });
 
@@ -209,6 +176,7 @@ builder.Services.AddControllers();
 // ======================================================
 
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
 
@@ -218,25 +186,137 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins(clientUrl)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    );
 });
 
+
+// ======================================================
+// Build Application
+// ======================================================
 
 var app = builder.Build();
 
 
 // ======================================================
-// Swagger
+// MongoDB Connection Test
 // ======================================================
 
-// Development check-এর বাইরে রেখেছি,
-// তাই সব environment-এ Swagger available থাকবে.
+try
+{
+    var mongoClient =
+        app.Services.GetRequiredService<IMongoClient>();
+
+    var mongoDatabase =
+        mongoClient.GetDatabase(databaseName);
+
+    await mongoDatabase.RunCommandAsync<BsonDocument>(
+        new BsonDocument("ping", 1)
+    );
+
+    Console.WriteLine();
+    Console.WriteLine(
+        "======================================================"
+    );
+
+    Console.WriteLine(
+        "✅ MongoDB connected successfully!"
+    );
+
+    Console.WriteLine(
+        $"📦 Database: {databaseName}"
+    );
+
+    Console.WriteLine(
+        "======================================================"
+    );
+}
+catch (Exception ex)
+{
+    Console.WriteLine();
+    Console.WriteLine(
+        "======================================================"
+    );
+
+    Console.WriteLine(
+        "❌ MongoDB connection failed!"
+    );
+
+    Console.WriteLine(
+        $"Error: {ex.Message}"
+    );
+
+    Console.WriteLine(
+        "======================================================"
+    );
+
+    throw;
+}
+
+
+// ======================================================
+// Seed MongoDB Database
+// ======================================================
+
+try
+{
+    Console.WriteLine();
+    Console.WriteLine(
+        "======================================================"
+    );
+
+    Console.WriteLine(
+        "🌱 Initializing MongoDB seed data..."
+    );
+
+    Console.WriteLine(
+        "======================================================"
+    );
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var seedDataService =
+            scope.ServiceProvider
+                .GetRequiredService<SeedDataService>();
+
+        await seedDataService.SeedDataAsync();
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine();
+    Console.WriteLine(
+        "======================================================"
+    );
+
+    Console.WriteLine(
+        "❌ MongoDB seeding failed!"
+    );
+
+    Console.WriteLine(
+        $"Error: {ex.Message}"
+    );
+
+    Console.WriteLine(
+        "======================================================"
+    );
+
+    throw;
+}
+
+
+// ======================================================
+// Swagger
+// ======================================================
 
 app.UseSwagger();
 
@@ -255,7 +335,7 @@ app.UseSwaggerUI(options =>
 // Middleware
 // ======================================================
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 
@@ -268,11 +348,47 @@ app.UseAuthorization();
 
 app.MapGet(
     "/health",
-    () => Results.Ok(new
+    async (IMongoClient mongoClient) =>
     {
-        status = "ok",
-        message = "HealthCarePlus API is running"
-    })
+        try
+        {
+            await mongoClient
+                .GetDatabase(databaseName)
+                .RunCommandAsync<BsonDocument>(
+                    new BsonDocument("ping", 1)
+                );
+
+            return Results.Ok(
+                new
+                {
+                    status = "ok",
+
+                    api = "running",
+
+                    mongodb = "connected",
+
+                    database = databaseName,
+
+                    frontend = clientUrl
+                }
+            );
+        }
+        catch
+        {
+            return Results.Json(
+                new
+                {
+                    status = "error",
+
+                    api = "running",
+
+                    mongodb = "disconnected"
+                },
+                statusCode:
+                    StatusCodes.Status503ServiceUnavailable
+            );
+        }
+    }
 );
 
 
@@ -284,7 +400,32 @@ app.MapControllers();
 
 
 // ======================================================
-// Run
+// Run Application
 // ======================================================
+
+Console.WriteLine();
+Console.WriteLine(
+    "======================================================"
+);
+
+Console.WriteLine(
+    "🚀 HealthCarePlus API is starting..."
+);
+
+Console.WriteLine(
+    "🌐 API: http://localhost:5000"
+);
+
+Console.WriteLine(
+    "📘 Swagger: http://localhost:5000/swagger"
+);
+
+Console.WriteLine(
+    "❤️ Health: http://localhost:5000/health"
+);
+
+Console.WriteLine(
+    "======================================================"
+);
 
 app.Run();

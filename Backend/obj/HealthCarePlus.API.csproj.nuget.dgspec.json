@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\2__Framework\\7_ASP.NET\\6\\smart-rx-frontend\\HealthCarePlus.API\\HealthCarePlus.API.csproj": {}
+    "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj": {}
   },
   "projects": {
-    "D:\\2__Framework\\7_ASP.NET\\6\\smart-rx-frontend\\HealthCarePlus.API\\HealthCarePlus.API.csproj": {
+    "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\2__Framework\\7_ASP.NET\\6\\smart-rx-frontend\\HealthCarePlus.API\\HealthCarePlus.API.csproj",
+        "projectUniqueName": "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
         "projectName": "HealthCarePlus.API",
-        "projectPath": "D:\\2__Framework\\7_ASP.NET\\6\\smart-rx-frontend\\HealthCarePlus.API\\HealthCarePlus.API.csproj",
+        "projectPath": "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\HealthCarePlus.API.csproj",
         "packagesPath": "C:\\Users\\UseR\\.nuget\\packages\\",
-        "outputPath": "D:\\2__Framework\\7_ASP.NET\\6\\smart-rx-frontend\\HealthCarePlus.API\\obj\\",
+        "outputPath": "D:\\2__Framework\\Projects\\MediCore-HealthCare\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\UseR\\AppData\\Roaming\\NuGet\\NuGet.Config"
