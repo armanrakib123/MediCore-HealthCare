@@ -1,8 +1,8 @@
 using MongoDB.Driver;
-using HealthCarePlus.API.Models;
+using MediCore.API.Models;
 using BCrypt.Net;
 
-namespace HealthCarePlus.API.Services;
+namespace MediCore.API.Services;
 
 public class SeedDataService
 {
@@ -41,7 +41,7 @@ public class SeedDataService
             adminUser = new User
             {
                 Username = "admin",
-                Email = "admin@healthcareplus.com",
+                Email = "admin@MediCore.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                 Role = "Admin",
                 FirstName = "System",

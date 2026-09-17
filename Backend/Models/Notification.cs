@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace HealthCarePlus.API.Models;
+namespace MediCore.API.Models;
 
 public class Notification
 {

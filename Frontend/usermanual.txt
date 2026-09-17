@@ -17,7 +17,7 @@ smart-rx-frontend/
 │   ├── api/                      -> Axios API client and endpoints
 │   └── hooks/, utils/            -> Shared logic/helpers
 ├── public/                       -> Static assets
-├── HealthCarePlus.API/           -> ASP.NET Core backend API
+├── MediCore.API/           -> ASP.NET Core backend API
 │   ├── Controllers/              -> API endpoints
 │   ├── Services/                 -> Business logic
 │   ├── Repositories/             -> Data layer
@@ -40,7 +40,7 @@ smart-rx-frontend/
 -------------------------
 1) Run Backend API
    - Open terminal:
-     cd /Users/ravindupiyumal/Desktop/newhealthcare/smart-rx-frontend/HealthCarePlus.API
+     cd /Users/ravindupiyumal/Desktop/newhealthcare/smart-rx-frontend/MediCore.API
      dotnet restore
      dotnet run
 

@@ -1,8 +1,8 @@
 using MongoDB.Driver;
 using MongoDB.Bson;
-using HealthCarePlus.API.Models;
+using MediCore.API.Models;
 
-namespace HealthCarePlus.API.Repositories;
+namespace MediCore.API.Repositories;
 
 public class BaseRepository<T> where T : class
 {

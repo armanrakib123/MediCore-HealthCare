@@ -1,4 +1,4 @@
-namespace HealthCarePlus.API.Services;
+namespace MediCore.API.Services;
 
 public class AvatarService
 {

@@ -1,4 +1,4 @@
-db = db.getSiblingDB('healthcareplus');
+db = db.getSiblingDB('MediCore');
 
 // Find all users without patient records
 var usersWithoutPatients = [];

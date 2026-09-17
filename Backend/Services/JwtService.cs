@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HealthCarePlus.API.Services;
+namespace MediCore.API.Services;
 
 public class JwtService
 {
@@ -17,7 +17,7 @@ public class JwtService
     public string GenerateToken(string username, string role, string userId)
     {
         var key = _config["Jwt:Key"] ?? throw new InvalidOperationException("Missing JWT key");
-        var issuer = _config["Jwt:Issuer"] ?? "HealthCarePlus";
+        var issuer = _config["Jwt:Issuer"] ?? "MediCore";
         var expiresMinutes = int.Parse(_config["Jwt:ExpiresMinutes"] ?? "60");
 
         var claims = new[] {

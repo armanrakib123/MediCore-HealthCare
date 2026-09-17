@@ -43,7 +43,7 @@ A full-stack healthcare web application designed to streamline digital prescript
 smart-rx-frontend/
 ├── src/                     # React frontend
 ├── public/
-├── HealthCarePlus.API/      # ASP.NET Core backend
+├── MediCore.API/      # ASP.NET Core backend
 ├── Healthcare_System_Architecture.md
 └── README.md
 ```
@@ -71,7 +71,7 @@ cd smart-rx-frontend
 ### 2) Run Backend API
 
 ```bash
-cd HealthCarePlus.API
+cd MediCore.API
 dotnet restore
 dotnet run
 ```

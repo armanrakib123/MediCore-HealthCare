@@ -1,9 +1,9 @@
-using HealthCarePlus.API.DTOs;
-using HealthCarePlus.API.Models;
-using HealthCarePlus.API.Repositories.Interfaces;
+using MediCore.API.DTOs;
+using MediCore.API.Models;
+using MediCore.API.Repositories.Interfaces;
 using MongoDB.Bson;
 
-namespace HealthCarePlus.API.Services;
+namespace MediCore.API.Services;
 
 public class PatientService
 {

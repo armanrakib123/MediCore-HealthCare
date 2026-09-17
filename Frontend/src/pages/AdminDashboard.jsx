@@ -12,7 +12,7 @@ import {
 
 const ADMIN_INFO = {
   name: 'Admin Dashboard',
-  email: 'admin@healthcareplus.com',
+  email: 'admin@MediCore.com',
   id: 'ADM-001',
   role: 'System Administrator',
   avatar: 'AD'
@@ -469,7 +469,7 @@ const DashboardView = memo(() => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold mb-2">System Overview 🎯</h2>
-          <p className="text-purple-100 text-lg">HealthCarePlus Management Dashboard</p>
+          <p className="text-purple-100 text-lg">MediCore Management Dashboard</p>
         </div>
         <div className="hidden md:block">
           <div className="bg-white/20 backdrop-blur rounded-2xl p-6">

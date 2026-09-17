@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using HealthCarePlus.API.DTOs;
-using HealthCarePlus.API.Models;
-using HealthCarePlus.API.Services;
+using MediCore.API.DTOs;
+using MediCore.API.Models;
+using MediCore.API.Services;
 using MongoDB.Driver;
 
-namespace HealthCarePlus.API.Controllers;
+namespace MediCore.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

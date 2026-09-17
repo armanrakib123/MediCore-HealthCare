@@ -1,6 +1,6 @@
-using HealthCarePlus.API.Services;
-using HealthCarePlus.API.Repositories.Interfaces;
-using HealthCarePlus.API.Repositories;
+using MediCore.API.Services;
+using MediCore.API.Repositories.Interfaces;
+using MediCore.API.Repositories;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -36,7 +36,6 @@ var mongoConnectionString =
 var databaseName =
     builder.Configuration["MongoDbSettings:DatabaseName"];
 
-// Validate MongoDB configuration
 if (string.IsNullOrWhiteSpace(mongoConnectionString))
 {
     throw new InvalidOperationException(
@@ -97,7 +96,7 @@ builder.Services.AddScoped<DoctorService>();
 builder.Services.AddScoped<PharmacyService>();
 
 builder.Services.AddScoped<
-    HealthCarePlus.API.Services.PatientService
+    MediCore.API.Services.PatientService
 >();
 
 builder.Services.AddScoped<JwtService>();
@@ -121,7 +120,7 @@ var jwtKey =
 
 var issuer =
     builder.Configuration["Jwt:Issuer"]
-    ?? "HealthCarePlus";
+    ?? "MediCore";
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
@@ -324,7 +323,7 @@ app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint(
         "/swagger/v1/swagger.json",
-        "HealthCarePlus API v1"
+        "MediCore API v1"
     );
 
     options.RoutePrefix = "swagger";
@@ -409,7 +408,7 @@ Console.WriteLine(
 );
 
 Console.WriteLine(
-    "🚀 HealthCarePlus API is starting..."
+    "🚀 MediCore API is starting..."
 );
 
 Console.WriteLine(

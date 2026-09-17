@@ -1,8 +1,8 @@
-using HealthCarePlus.API.Models;
-using HealthCarePlus.API.Repositories.Interfaces;
-using HealthCarePlus.API.DTOs;
+using MediCore.API.Models;
+using MediCore.API.Repositories.Interfaces;
+using MediCore.API.DTOs;
 
-namespace HealthCarePlus.API.Services;
+namespace MediCore.API.Services;
 
 public class DoctorService
 {
@@ -15,7 +15,7 @@ public class DoctorService
         _userService = userService;
     }
 
-    public async Task<string?> RegisterDoctorAsync(DoctorRegisterDto dto)
+    public async Task<string?> RegisterDoctorAsync(DoctorRegisterDto dto, string? avatarColor = null, string? avatarEmoji = null, string? avatarUrl = null)
     {
         // Check if username or email already exists
         if (await _userService.GetByUsernameAsync(dto.Username) != null)
@@ -28,6 +28,8 @@ public class DoctorService
         if (await _doctorRepository.GetByLicenseNumberAsync(dto.LicenseNumber) != null)
             return null; // License number already exists
 
+        var profileImage = !string.IsNullOrWhiteSpace(dto.ProfileImageUrl) ? dto.ProfileImageUrl : avatarUrl;
+
         // Create user first
         var user = new User
         {
@@ -39,7 +41,10 @@ public class DoctorService
             LastName = dto.LastName ?? "",
             Phone = dto.Phone,
             DateOfBirth = dto.DateOfBirth,
-            LicenseNumber = dto.LicenseNumber
+            LicenseNumber = dto.LicenseNumber,
+            AvatarColor = avatarColor,
+            AvatarEmoji = avatarEmoji,
+            ProfileImageUrl = profileImage
         };
 
         var userId = await _userService.CreateAsync(user);
@@ -61,6 +66,7 @@ public class DoctorService
             Languages = dto.Languages ?? new List<string>(),
             Biography = dto.Biography,
             ConsultationFee = dto.ConsultationFee,
+            ProfileImageUrl = profileImage,
             IsAvailable = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

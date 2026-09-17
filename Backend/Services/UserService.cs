@@ -1,8 +1,8 @@
 using MongoDB.Driver;
 using MongoDB.Bson;
-using HealthCarePlus.API.Models;
+using MediCore.API.Models;
 
-namespace HealthCarePlus.API.Services;
+namespace MediCore.API.Services;
 
 public class UserService
 {

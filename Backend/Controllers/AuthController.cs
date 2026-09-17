@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using BCrypt.Net;
-using HealthCarePlus.API.DTOs;
-using HealthCarePlus.API.Models;
-using HealthCarePlus.API.Services;
+using MediCore.API.DTOs;
+using MediCore.API.Models;
+using MediCore.API.Services;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Net.Http;
 
-namespace HealthCarePlus.API.Controllers;
+namespace MediCore.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -144,6 +144,28 @@ public class AuthController : ControllerBase
         if (dto == null)
             return BadRequest("Invalid request data");
 
+        if (string.IsNullOrWhiteSpace(dto.Username))
+            return BadRequest("Username is required");
+
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            return BadRequest("Email is required");
+
+        if (string.IsNullOrWhiteSpace(dto.Password))
+            return BadRequest("Password is required");
+
+        if (string.IsNullOrWhiteSpace(dto.LicenseNumber))
+            return BadRequest("Medical license number is required");
+
+        // Check if username already exists
+        var existingUsername = await _userService.GetByUsernameAsync(dto.Username);
+        if (existingUsername != null)
+            return BadRequest("Username already taken");
+
+        // Check if email already exists
+        var existingEmail = await _userService.GetByEmailAsync(dto.Email);
+        if (existingEmail != null)
+            return BadRequest("Email already registered");
+
         // Check if license number already exists
         var existingDoctor = await _doctorService.GetDoctorByLicenseNumberAsync(dto.LicenseNumber);
         if (existingDoctor != null)
@@ -154,7 +176,7 @@ public class AuthController : ControllerBase
         var avatarUrl = _avatarService.GenerateAvatarUrl(color, emoji);
 
         // Register the doctor
-        var doctorId = await _doctorService.RegisterDoctorAsync(dto);
+        var doctorId = await _doctorService.RegisterDoctorAsync(dto, color, emoji, avatarUrl);
         if (doctorId == null)
             return BadRequest("Failed to register doctor");
 

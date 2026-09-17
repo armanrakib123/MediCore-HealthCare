@@ -1,4 +1,4 @@
-namespace HealthCarePlus.API.DTOs;
+namespace MediCore.API.DTOs;
 
 public class LogAdherenceDto
 {

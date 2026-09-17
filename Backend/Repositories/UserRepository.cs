@@ -1,8 +1,8 @@
 using MongoDB.Driver;
-using HealthCarePlus.API.Models;
-using HealthCarePlus.API.Repositories.Interfaces;
+using MediCore.API.Models;
+using MediCore.API.Repositories.Interfaces;
 
-namespace HealthCarePlus.API.Repositories;
+namespace MediCore.API.Repositories;
 
 public class UserRepository : BaseRepository<User>, IUserRepository
 {

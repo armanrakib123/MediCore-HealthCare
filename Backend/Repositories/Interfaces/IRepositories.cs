@@ -1,6 +1,6 @@
-using HealthCarePlus.API.Models;
+using MediCore.API.Models;
 
-namespace HealthCarePlus.API.Repositories.Interfaces;
+namespace MediCore.API.Repositories.Interfaces;
 
 public interface IUserRepository
 {

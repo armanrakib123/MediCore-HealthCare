@@ -1,4 +1,4 @@
-namespace HealthCarePlus.API.DTOs;
+namespace MediCore.API.DTOs;
 
 public record RegisterDto(string Username, string Email, string Password, string Role, string? Phone, DateTime? DateOfBirth);
 public record LoginDto(string UsernameOrEmail, string Password);
@@ -14,15 +14,16 @@ public record DoctorRegisterDto(
     string FirstName, 
     string LastName,
     string Phone, 
-    DateTime DateOfBirth,
-    string LicenseNumber, 
-    string Specialization, 
-    string MedicalSchool, 
-    int YearsOfExperience,
-    List<string> Certifications,
-    List<string> Languages,
-    decimal ConsultationFee,
-    string? Biography = null
+    DateTime? DateOfBirth = null,
+    string LicenseNumber = "", 
+    string Specialization = "", 
+    string MedicalSchool = "", 
+    int YearsOfExperience = 0,
+    List<string>? Certifications = null,
+    List<string>? Languages = null,
+    decimal ConsultationFee = 0,
+    string? Biography = null,
+    string? ProfileImageUrl = null
 );
 
 public record DoctorLoginDto(string UsernameOrEmail, string Password);
