@@ -25,3 +25,6 @@ dist-ssr
 
 Debug
 
+.env
+.env.local
+.env.development.local

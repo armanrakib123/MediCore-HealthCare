@@ -743,14 +743,6 @@ const RegistrationForm = ({ role, onBack, onSuccess }) => {
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <button
-            type="button"
-            onClick={onBack}
-            className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-900"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Role Selection
-          </button>
 
           <div
             className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${config.color} text-white shadow-lg`}

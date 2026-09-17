@@ -227,13 +227,6 @@ const LoginForm = ({ onBack, onSuccess }) => {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Role Selection
-          </button>
           
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl text-white shadow-lg mb-4">
             <User className="w-8 h-8" />
