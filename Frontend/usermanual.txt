@@ -54,7 +54,7 @@ smart-rx-frontend/
      npm run dev
 
    - Frontend URL:
-     http://localhost:5173
+     https://medicore-healthcare-seven.vercel.app
 
 3) API Base URL (if needed)
    - In frontend .env file set:
@@ -64,7 +64,7 @@ smart-rx-frontend/
 🔐 Login Methods
 ----------------
 A) Normal Login
-   - Go to: http://localhost:5173/auth
+   - Go to: https://medicore-healthcare-seven.vercel.app/auth
    - Select your role and login with email/username + password.
 
 B) Google Login

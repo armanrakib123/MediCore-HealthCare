@@ -90,7 +90,7 @@ npm run dev
 ```
 
 Frontend default URL:
-- `http://localhost:5173`
+- `https://medicore-healthcare-seven.vercel.app`
 
 ---
 

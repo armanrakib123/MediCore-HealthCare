@@ -18,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var clientUrl =
     Environment.GetEnvironmentVariable("BaseUrl")
-    ?? "http://localhost:5173";
+    ?? "https://medicore-healthcare-seven.vercel.app";
 
 Console.WriteLine();
 Console.WriteLine("======================================================");
@@ -190,7 +190,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins(clientUrl, "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000")
+                .WithOrigins(clientUrl, "https://medicore-healthcare-seven.vercel.app", "http://127.0.0.1:5173", "http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\MediCore-HealthCare\\backend\\MediCore.API.csproj": {}
+    "D:\\MediCore-HealthCare\\Backend\\MediCore.API.csproj": {}
   },
   "projects": {
-    "D:\\MediCore-HealthCare\\backend\\MediCore.API.csproj": {
+    "D:\\MediCore-HealthCare\\Backend\\MediCore.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\MediCore-HealthCare\\backend\\MediCore.API.csproj",
+        "projectUniqueName": "D:\\MediCore-HealthCare\\Backend\\MediCore.API.csproj",
         "projectName": "MediCore.API",
-        "projectPath": "D:\\MediCore-HealthCare\\backend\\MediCore.API.csproj",
+        "projectPath": "D:\\MediCore-HealthCare\\Backend\\MediCore.API.csproj",
         "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
-        "outputPath": "D:\\MediCore-HealthCare\\backend\\obj\\",
+        "outputPath": "D:\\MediCore-HealthCare\\Backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config"
