@@ -520,7 +520,7 @@ export default function Login() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="form-input"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+8801727868832"
                   />
                 </div>
               </div>

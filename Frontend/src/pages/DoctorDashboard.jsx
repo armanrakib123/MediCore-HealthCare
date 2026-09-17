@@ -1078,7 +1078,7 @@ const ProfileView = memo(() => {
     license: doctorInfo?.license || doctorInfo?.licenseNumber || user?.licenseNumber || 'MD-CA-10293',
     npi: doctorInfo?.npi || '1234567890',
     yearsExperience: doctorInfo?.experience || 12,
-    phone: doctorInfo?.phone || '+1 (555) 123-4567',
+    phone: doctorInfo?.phone || '+8801727868832',
     address: doctorInfo?.address || '123 Medical Center Drive, Suite 200',
     hospital: doctorInfo?.facility || 'MediCore Medical Center',
     education: Array.isArray(doctorInfo?.education) && doctorInfo.education[0] 

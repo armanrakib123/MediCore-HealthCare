@@ -1233,7 +1233,7 @@ const PatientDashboard = () => {
             <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
             <input
               type="tel"
-              defaultValue="+1 (555) 123-4567"
+              defaultValue="+8801727868832"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
             />
           </div>
