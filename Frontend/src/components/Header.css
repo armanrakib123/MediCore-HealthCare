@@ -1,6 +1,6 @@
 .site-header {
-  background: linear-gradient(135deg, #1a472a 0%, #2a5c3e 100%);
-  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #309b53 0%, #2a5c3e 100%);
+  padding: 2rem 3rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -9,6 +9,54 @@
   top: 0;
   z-index: 1000;
 }
+
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+
+  color: #214e79;
+  text-decoration: none;
+
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #046961,
+    #2fac9d
+  );
+
+  color: #ffffffcc;
+
+  font-size: 20px;
+
+  box-shadow:
+    0 7px 18px rgba(20, 184, 166, 0.22);
+}
+
+.brand-text {
+  font-size: 33px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: #1e4569;
+}
+
+.brand-text span {
+  color: #249e96;
+}
+
 
 .brand a {
   color: #ffffff;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { FaHome, FaInfoCircle, FaHospital, FaUserMd, FaPills, FaEnvelope, FaSignInAlt, FaSignOutAlt, FaUser, FaChevronDown, FaBriefcase, FaClipboard, FaBell } from 'react-icons/fa'
+import { FaHome, FaInfoCircle, FaHospital,FaHeartbeat, FaUserMd, FaPills, FaEnvelope, FaSignInAlt, FaSignOutAlt, FaUser, FaChevronDown, FaBriefcase, FaClipboard, FaBell } from 'react-icons/fa'
 import Avatar from './Avatar'
 import './Header.css'
 
@@ -65,10 +65,10 @@ const getCurrentUser = () => {
         const loginTime = new Date(parsed.loginTime);
         const now = new Date();
         const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
-        
+
         if (hoursDiff <= 24) {
-          return { 
-            ...parsed, 
+          return {
+            ...parsed,
             type: 'admin',
             username: parsed.username || parsed.name || 'Admin User'
           };
@@ -124,7 +124,7 @@ export default function Header() {
 
     // Listen for storage changes from other tabs/components
     window.addEventListener('storage', handleStorageChange)
-    
+
     // Listen for custom auth changes within the same tab
     window.addEventListener('authStateChange', handleAuthStateChange)
     window.addEventListener('userLogin', handleAuthStateChange)
@@ -170,17 +170,17 @@ export default function Header() {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     localStorage.removeItem('adminAuth')
-    
+
     // Update local state
     setUser(null)
     setShowUserMenu(false)
     setShowNotifications(false)
-    
+
     // Dispatch custom event to notify other components
-    window.dispatchEvent(new CustomEvent('authStateChange', { 
-      detail: { type: 'logout' } 
+    window.dispatchEvent(new CustomEvent('authStateChange', {
+      detail: { type: 'logout' }
     }))
-    
+
     navigate('/')
   }
 
@@ -267,9 +267,20 @@ export default function Header() {
   }
 
   return (
-    <header className="site-header">
+    <header className="site-header px-12">
       <div className="brand">
-        <NavLink to="/">MediCore</NavLink>
+        <NavLink
+          to="/"
+          className="brand"
+        >
+          <span className="brand-icon">
+            <FaHeartbeat />
+          </span>
+
+          <span className="brand-text">
+            Medi<span>Core</span>
+          </span>
+        </NavLink>
       </div>
 
       <nav className="main-nav">
